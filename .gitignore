@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Environment variables
+.env
+
+# Logs
+*.log
+bot.log
+
+# Project specific
+temp/
+
+# IDEs
+.idea/
+.vscode/
+.DS_Store
