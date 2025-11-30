@@ -19,6 +19,7 @@ bot.log
 
 # Project specific
 temp/
+creds.json
 
 # IDEs
 .idea/

@@ -210,50 +210,58 @@ async def send_user_notification(user_id: int, text: str, parse_mode="Markdown")
 # ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ - ОПЕРАЦИИ С ОСТАТКОМ (THREAD-SAFE!)
 # ============================================================================
 
+async def _get_stock_no_lock() -> int:
+    """🔒 Внутренняя функция получения остатка (БЕЗ БЛОКИРОВКИ)"""
+    if SHEETS_AVAILABLE and sheets:
+        try:
+            stock = sheets.get_stock()
+            logger.info(f"📦 Остаток из Google Sheets: {stock}")
+            return stock
+        except Exception as e:
+            logger.warning(f"⚠️ Ошибка получения остатка из Google Sheets: {e}")
+            return STOCK_DATA.get('quantity', 0)
+    return STOCK_DATA.get('quantity', 0)
+
+async def _set_stock_no_lock(quantity: int) -> bool:
+    """🔒 Внутренняя функция установки остатка (БЕЗ БЛОКИРОВКИ)"""
+    if SHEETS_AVAILABLE and sheets:
+        try:
+            success = sheets.set_stock(quantity)
+            if success:
+                STOCK_DATA['quantity'] = quantity
+                logger.info(f"✅ Остаток установлен в Google Sheets: {quantity}")
+                return True
+            else:
+                logger.warning(f"⚠️ Не удалось установить остаток в Google Sheets")
+                return False
+        except Exception as e:
+            logger.warning(f"⚠️ Ошибка установки остатка в Google Sheets: {e}")
+            STOCK_DATA['quantity'] = quantity
+            return False
+    else:
+        STOCK_DATA['quantity'] = quantity
+        return True
+
 async def get_stock() -> int:
     """✅ Получить текущий остаток (БЕЗОПАСНО для параллельного доступа)"""
     async with stock_lock:
-        if SHEETS_AVAILABLE and sheets:
-            try:
-                stock = sheets.get_stock()
-                logger.info(f"📦 Остаток из Google Sheets: {stock}")
-                return stock
-            except Exception as e:
-                logger.warning(f"⚠️ Ошибка получения остатка из Google Sheets: {e}")
-                return STOCK_DATA.get('quantity', 0)
-        return STOCK_DATA.get('quantity', 0)
+        return await _get_stock_no_lock()
 
 async def set_stock(quantity: int) -> bool:
     """✅ Установить остаток (БЕЗОПАСНО для параллельного доступа)"""
     async with stock_lock:
-        if SHEETS_AVAILABLE and sheets:
-            try:
-                success = sheets.set_stock(quantity)
-                if success:
-                    STOCK_DATA['quantity'] = quantity
-                    logger.info(f"✅ Остаток установлен в Google Sheets: {quantity}")
-                    return True
-                else:
-                    logger.warning(f"⚠️ Не удалось установить остаток в Google Sheets")
-                    return False
-            except Exception as e:
-                logger.warning(f"⚠️ Ошибка установки остатка в Google Sheets: {e}")
-                STOCK_DATA['quantity'] = quantity
-                return False
-        else:
-            STOCK_DATA['quantity'] = quantity
-            return True
+        return await _set_stock_no_lock(quantity)
 
 async def decrease_stock_safe() -> Optional[int]:
     """✅ Уменьшить остаток на 1 (АТОМАРНАЯ операция, БЕЗОПАСНО!)"""
     async with stock_lock:
-        current = await get_stock()
+        current = await _get_stock_no_lock()
         if current <= 0:
             logger.warning(f"❌ Остаток уже 0, не можем уменьшить!")
             return None
         
         new_stock = current - 1
-        success = await set_stock(new_stock)
+        success = await _set_stock_no_lock(new_stock)
         
         if success:
             logger.info(f"✅ Остаток уменьшен: {current} → {new_stock}")
@@ -265,9 +273,9 @@ async def decrease_stock_safe() -> Optional[int]:
 async def increase_stock_safe(count: int = 1) -> Optional[int]:
     """✅ Увеличить остаток на N единиц (компенсирующая операция при откате)"""
     async with stock_lock:
-        current = await get_stock()
+        current = await _get_stock_no_lock()
         new_stock = current + count
-        success = await set_stock(new_stock)
+        success = await _set_stock_no_lock(new_stock)
         
         if success:
             logger.info(f"✅ Остаток увеличен: {current} → {new_stock}")
@@ -275,6 +283,64 @@ async def increase_stock_safe(count: int = 1) -> Optional[int]:
         else:
             logger.error(f"❌ Ошибка увеличения остатка!")
             return None
+
+async def process_successful_payment(payment_id: str) -> bool:
+    """✅ Обработка успешного платежа (вынесена в отдельную функцию)"""
+    if payment_id not in PENDING_PAYMENTS:
+        logger.warning(f"⚠️ Платеж {payment_id} не найден в PENDING_PAYMENTS")
+        return True # Считаем обработанным, чтобы не ретраить webhook бесконечно
+    
+    order_data = PENDING_PAYMENTS[payment_id]
+    user_id = order_data['user_id']
+    fio = order_data['fio']
+    phone = order_data['phone']
+    address = order_data['address']
+    
+    # Обновляем статус заказа
+    success = await update_order_status_with_retry(payment_id, "Успешно оплачено")
+    
+    if success:
+        # ✅ ОТПРАВЛЯЕМ ПОДТВЕРЖДЕНИЕ КЛИЕНТУ
+        confirmation_text = (
+            f"✅ *Спасибо за покупку!*\n\n"
+            f"Ваш заказ успешно оплачен!\n\n"
+            f"📦 *Детали заказа:*\n"
+            f"🛍️ Товар: {PRODUCT_NAME}\n"
+            f"💰 Сумма: {PRODUCT_PRICE} ₽\n"
+            f"🆔 ID заказа: {payment_id}\n\n"
+            f"📍 *Доставка по адресу:*\n"
+            f"{address}\n\n"
+            f"Ожидайте товар в течение 3-5 дней.\n"
+            f"Мы отправим вам трек-номер в отдельном сообщении."
+        )
+        
+        await send_user_notification(user_id, confirmation_text)
+        
+        # ✅ УВЕДОМЛЯЕМ АДМИНА
+        admin_notification = (
+            f"✅ ПЛАТЕЖ УСПЕШЕН!\n\n"
+            f"🆔 ID платежа: {payment_id}\n"
+            f"👤 ФИО: {fio}\n"
+            f"☎️ Телефон: {phone}\n"
+            f"🏠 Адрес: {address}\n"
+            f"💰 Сумма: {PRODUCT_PRICE} ₽\n"
+            f"⏰ Время: {datetime.now().strftime('%d.%m.%Y %H:%M:%S')}\n\n"
+            f"✅ Статус обновлен в Google Sheets"
+        )
+        await send_admin_notification(admin_notification)
+        
+        # Удаляем из PENDING
+        del PENDING_PAYMENTS[payment_id]
+        logger.info(f"✅ Заказ {payment_id} обработан успешно!")
+        return True
+    else:
+        logger.error(f"❌ Не удалось обновить статус заказа {payment_id}")
+        await send_admin_notification(
+            f"🚨 ОШИБКА: Статус заказа {payment_id} не обновлен!\n"
+            f"Платеж получен, но в таблице статус не изменился.\n"
+            f"ДЕЙСТВИЕ: Вручную обновите в Google Sheets!"
+        )
+        return False
 
 # ============================================================================
 # ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ - ОПЕРАЦИИ С ЗАКАЗАМИ (RETRY LOGIC!)
@@ -481,42 +547,62 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if is_admin:
         help_text = (
-            f"*🛒 КОМАНДЫ ПОЛЬЗОВАТЕЛЯ:*\n"
+            f"🛒 КОМАНДЫ ПОЛЬЗОВАТЕЛЯ:\n"
             f"/start — 🏠 Главное меню и карточка товара\n"
             f"/help — ❓ Эта справка\n\n"
-            f"*👨‍💼 АДМИНСКИЕ КОМАНДЫ:*\n"
-            f"/setstock `<количество>` — 📊 Установить остаток\n"
-            f"  _Пример: /setstock 50_\n\n"
+            f"👨‍💼 АДМИНСКИЕ КОМАНДЫ:\n"
+            f"/setstock <количество> — 📊 Установить остаток\n"
+            f"  Пример: /setstock 50\n\n"
             f"/stock — 📦 Проверить текущий остаток\n\n"
             f"/notify_waitlist — 📢 Отправить рассылку листу ожидания\n\n"
-            f"*📝 Примеры:*\n"
-            f"• `/setstock 100` — установит остаток на 100 шт\n"
-            f"• `/stock` — покажет текущий остаток\n"
-            f"• `/notify_waitlist` — отправит уведомления ожидающим\n\n"
-            f"⚠️ _Все действия администратора логируются_\n"
-            f"💾 _Все данные сохраняются в Google Sheets_"
+            f"📝 Примеры:\n"
+            f"• /setstock 100 — установит остаток на 100 шт\n"
+            f"• /stock — покажет текущий остаток\n"
+            f"• /notify_waitlist — отправит уведомления ожидающим\n\n"
+            f"⚠️ Все действия администратора логируются\n"
+            f"💾 Все данные сохраняются в Google Sheets"
         )
         
-        await update.message.reply_text(help_text, parse_mode="Markdown")
+        await update.message.reply_text(help_text)
     
     else:
         help_text = (
-            f"*📚 Доступные команды:*\n\n"
+            f"📚 Доступные команды:\n\n"
             f"/start — 🏠 Главное меню и информация о товаре\n"
             f"/help — ❓ Эта справка\n\n"
-            f"*🛍️ Как оформить заказ:*\n"
-            f"1️⃣ Нажми `/start`\n"
+            f"🛍️ Как оформить заказ:\n"
+            f"1️⃣ Нажми /start\n"
             f"2️⃣ Нажми кнопку \"🛒 Оформить заказ\"\n"
             f"3️⃣ Заполни форму (телефон, ФИО, адрес)\n"
             f"4️⃣ Проверь данные и подтверди заказ\n"
             f"5️⃣ Перейди по ссылке для оплаты\n\n"
             f"✅ После оплаты тебе придет подтверждение и чек!\n\n"
-            f"❓ _Если товара нет в наличии, ты сможешь встать в очередь ожидания_"
+            f"❓ Если товара нет в наличии, ты сможешь встать в очередь ожидания"
         )
         
-        await update.message.reply_text(help_text, parse_mode="Markdown")
+        await update.message.reply_text(help_text)
     
     return ConversationHandler.END
+
+async def simulate_payment_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """💳 Симуляция оплаты при нажатии кнопки"""
+    query = update.callback_query
+    user = query.from_user
+    await query.answer()
+    
+    # data format: pay_{payment_id}
+    payment_id = query.data.replace("pay_", "")
+    
+    logger.info(f"💳 Пользователь {user.id} симулирует оплату заказа {payment_id}")
+    
+    await query.edit_message_text("⏳ Обработка платежа (симуляция)...")
+    
+    success = await process_successful_payment(payment_id)
+    
+    if success:
+        await query.message.reply_text("✅ Симуляция успешна! Платеж обработан.")
+    else:
+        await query.message.reply_text("❌ Ошибка симуляции платежа.")
 
 async def button_buy_product(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """🛒 Нажатие кнопки 'КУПИТЬ'"""
@@ -1084,60 +1170,11 @@ async def handle_yookassa_webhook(request):
             # ✅ ПЛАТЕЖ УСПЕШЕН!
             logger.info(f"✅ Платеж {payment_id} успешен!")
             
-            # Получаем данные заказа
-            if payment_id not in PENDING_PAYMENTS:
-                logger.warning(f"⚠️ Платеж {payment_id} не найден в PENDING_PAYMENTS")
-                return web.Response(status=200, text="OK")
+            success = await process_successful_payment(payment_id)
             
-            order_data = PENDING_PAYMENTS[payment_id]
-            user_id = order_data['user_id']
-            fio = order_data['fio']
-            phone = order_data['phone']
-            address = order_data['address']
-            
-            # Обновляем статус заказа
-            success = await update_order_status_with_retry(payment_id, "Успешно оплачено")
-            
-            if success:
-                # ✅ ОТПРАВЛЯЕМ ПОДТВЕРЖДЕНИЕ КЛИЕНТУ
-                confirmation_text = (
-                    f"✅ *Спасибо за покупку!*\n\n"
-                    f"Ваш заказ успешно оплачен!\n\n"
-                    f"📦 *Детали заказа:*\n"
-                    f"🛍️ Товар: {PRODUCT_NAME}\n"
-                    f"💰 Сумма: {PRODUCT_PRICE} ₽\n"
-                    f"🆔 ID заказа: {payment_id}\n\n"
-                    f"📍 *Доставка по адресу:*\n"
-                    f"{address}\n\n"
-                    f"Ожидайте товар в течение 3-5 дней.\n"
-                    f"Мы отправим вам трек-номер в отдельном сообщении."
-                )
-                
-                await send_user_notification(user_id, confirmation_text)
-                
-                # ✅ УВЕДОМЛЯЕМ АДМИНА
-                admin_notification = (
-                    f"✅ ПЛАТЕЖ УСПЕШЕН!\n\n"
-                    f"🆔 ID платежа: {payment_id}\n"
-                    f"👤 ФИО: {fio}\n"
-                    f"☎️ Телефон: {phone}\n"
-                    f"🏠 Адрес: {address}\n"
-                    f"💰 Сумма: {PRODUCT_PRICE} ₽\n"
-                    f"⏰ Время: {datetime.now().strftime('%d.%m.%Y %H:%M:%S')}\n\n"
-                    f"✅ Статус обновлен в Google Sheets"
-                )
-                await send_admin_notification(admin_notification)
-                
-                # Удаляем из PENDING
-                del PENDING_PAYMENTS[payment_id]
-                logger.info(f"✅ Заказ {payment_id} обработан успешно!")
-            else:
-                logger.error(f"❌ Не удалось обновить статус заказа {payment_id}")
-                await send_admin_notification(
-                    f"🚨 ОШИБКА: Статус заказа {payment_id} не обновлен!\n"
-                    f"Платеж получен, но в таблице статус не изменился.\n"
-                    f"ДЕЙСТВИЕ: Вручную обновите в Google Sheets!"
-                )
+            if not success:
+                logger.error(f"❌ Не удалось обработать успешный платеж {payment_id}")
+                return web.Response(status=500, text="Internal Server Error")
         
         elif status == 'canceled':
             logger.warning(f"⚠️ Платеж {payment_id} отменен!")
@@ -1239,7 +1276,9 @@ def main():
     conv_handler = ConversationHandler(
         entry_points=[
             CommandHandler('start', start),
+            CommandHandler('start', start),
             CallbackQueryHandler(button_buy_product, pattern='^buy_product$'),
+            CallbackQueryHandler(simulate_payment_callback, pattern='^pay_.*'),
         ],
         states={
             ASKING_PHONE: [
