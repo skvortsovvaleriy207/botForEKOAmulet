@@ -281,7 +281,7 @@ async def increase_stock_safe(count: int = 1) -> Optional[int]:
 # ============================================================================
 
 async def add_order_to_sheets_with_retry(payment_id: str, user_id: int, fio: str, 
-                                        address: str, phone: str) -> bool:
+                                        address: str, phone: str, ref_code: str = None) -> bool:
     """✅ Добавить заказ в Google Sheets с повторными попытками"""
     
     for attempt in range(MAX_RETRIES):
@@ -297,7 +297,8 @@ async def add_order_to_sheets_with_retry(payment_id: str, user_id: int, fio: str
                     phone=phone,
                     product=PRODUCT_NAME,
                     price=PRODUCT_PRICE,
-                    status="Ожидание оплаты"
+                    status="Ожидание оплаты",
+                    ref_code=ref_code
                 )
                 
                 if success:
@@ -331,6 +332,7 @@ async def add_order_to_sheets_with_retry(payment_id: str, user_id: int, fio: str
                 'fio': fio,
                 'address': address,
                 'phone': phone,
+                'ref_code': ref_code,
                 'status': 'Ожидание оплаты',
                 'created_at': datetime.now().isoformat()
             }
@@ -440,7 +442,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # 🔗 ПОДДЕРЖКА DEEPLINK ПАРАМЕТРОВ
     if context.args:
-        logger.info(f"🔗 DeepLink параметр получен: {context.args}")
+        ref_code = context.args[0]
+        context.user_data['ref_code'] = ref_code
+        logger.info(f"🔗 DeepLink параметр получен и сохранен: {ref_code}")
 
     welcome_text = (
         f"✨ *{PRODUCT_NAME} — ваш карманный мастер и универсальный ремонтный комплект!*\n\n"
@@ -454,8 +458,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"💰 *Цена:* {PRODUCT_PRICE} ₽\n"
         f"🚚 *Доставка по России:* 3–5 дней\n"
         f"✅ *Решайте проблемы быстро, просто и навсегда!*\n\n"
-        f"Чтобы оформить заказ, нажмите кнопку ниже:"
     )
+
+    if context.user_data.get('ref_code'):
+        welcome_text += f"🎁 *Применен реферальный код:* `{context.user_data['ref_code']}`\n\n"
+
+    welcome_text += "Чтобы оформить заказ, нажмите кнопку ниже:"
 
     keyboard = [[
         InlineKeyboardButton("🛒 Оформить заказ", callback_data='buy_product')
@@ -657,6 +665,7 @@ async def confirm_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     fio = context.user_data.get('fio')
     address = context.user_data.get('address')
     phone = context.user_data.get('phone')
+    ref_code = context.user_data.get('ref_code', 'N/A')
     
     try:
         # 1️⃣ ГЕНЕРИРУЕМ УНИКАЛЬНЫЙ PAYMENT_ID
@@ -668,6 +677,7 @@ async def confirm_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
             'fio': fio,
             'address': address,
             'phone': phone,
+            'ref_code': ref_code,
             'status': 'pending',
             'created_at': datetime.now().isoformat()
         }
@@ -688,7 +698,7 @@ async def confirm_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return ConversationHandler.END
         
         # 4️⃣ ДОБАВЛЯЕМ ЗАКАЗ В ТАБЛИЦУ (с retry logic!)
-        success = await add_order_to_sheets_with_retry(payment_id, user.id, fio, address, phone)
+        success = await add_order_to_sheets_with_retry(payment_id, user.id, fio, address, phone, ref_code)
         
         if not success:
             # ❌ НЕ УДАЛОСЬ ДОБАВИТЬ ЗАКАЗ
@@ -746,6 +756,7 @@ async def confirm_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"👤 ФИО: {fio}\n"
             f"☎️ Телефон: {phone}\n"
             f"🏠 Адрес: {address}\n"
+            f"🔗 Ref: {ref_code}\n"
             f"💰 Сумма: {PRODUCT_PRICE} ₽\n"
             f"📊 Статус: Ожидание оплаты\n"
             f"⏰ Время: {datetime.now().strftime('%d.%m.%Y %H:%M:%S')}\n"

@@ -23,7 +23,7 @@ class GoogleSheetsHandler:
         return True
 
     def add_order(self, payment_id: str, user_id: int, fio: str, 
-                 address: str, phone: str, product: str, price: int, status: str) -> bool:
+                 address: str, phone: str, product: str, price: int, status: str, ref_code: str = None) -> bool:
         """Add new order to sheets"""
         # Implement logic to add row
         return True
