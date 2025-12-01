@@ -1276,7 +1276,7 @@ def main():
     conv_handler = ConversationHandler(
         entry_points=[
             CommandHandler('start', start),
-            CommandHandler('start', start),
+            CommandHandler('help', help_command),
             CallbackQueryHandler(button_buy_product, pattern='^buy_product$'),
             CallbackQueryHandler(simulate_payment_callback, pattern='^pay_.*'),
         ],
@@ -1310,8 +1310,6 @@ def main():
     # 🔧 ПОРЯДОК ОБРАБОТЧИКОВ КРИТИЧЕН!
     
     # 1️⃣ КОМАНДЫ
-    application.add_handler(CommandHandler('start', start))
-    application.add_handler(CommandHandler('help', help_command))
     application.add_handler(CommandHandler('setstock', cmd_setstock))
     application.add_handler(CommandHandler('stock', cmd_stock))
     application.add_handler(CommandHandler('notify_waitlist', cmd_notify_waitlist))
