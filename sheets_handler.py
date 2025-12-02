@@ -82,7 +82,7 @@ class GoogleSheetsHandler:
         try:
             worksheet = self.sheet.worksheet(self.SHEET_ORDERS)
             
-            # Columns: Payment ID, User ID, FIO, Address, Phone, Product, Price, Status, Ref Code, Date
+            # Columns: Payment ID, FIO, Address, Phone, Product, Price, Status, Ref Code, Date
             row = [
                 payment_id,
                 fio,
@@ -95,7 +95,18 @@ class GoogleSheetsHandler:
                 datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             ]
             
-            worksheet.append_row(row)
+            # Find the next available row in Column A
+            # col_values(1) returns all values in the first column
+            next_row = len(worksheet.col_values(1)) + 1
+            
+            # Explicitly define the range A{row}:I{row} to force correct placement
+            # Columns: A, B, C, D, E, F, G, H, I (9 columns)
+            target_range = f"A{next_row}:I{next_row}"
+            
+            logger.info(f"📝 Writing order to {target_range}")
+            
+            # Update the specific range
+            worksheet.update(target_range, [row])
             return True
         except Exception as e:
             logger.error(f"❌ Ошибка добавления заказа: {e}")
@@ -109,11 +120,11 @@ class GoogleSheetsHandler:
             # Find the cell with payment_id
             cell = worksheet.find(payment_id)
             if cell:
-                # Assuming Status is in column 8 (H)
-                # PaymentID (A) -> 1, Status (H) -> 8
+                # Assuming Status is in column 7 (G)
+                # PaymentID (A) -> 1, Status (G) -> 7
                 # But we should be careful if columns change. 
                 # Let's assume fixed structure for now as per plan.
-                worksheet.update_cell(cell.row, 8, new_status)
+                worksheet.update_cell(cell.row, 7, new_status)
                 return True
             else:
                 logger.warning(f"⚠️ Заказ {payment_id} не найден в таблице")
@@ -128,14 +139,22 @@ class GoogleSheetsHandler:
         try:
             worksheet = self.sheet.worksheet(self.SHEET_WAITLIST)
             
-            # Columns: Phone, User ID, Date
+            # Columns: Phone, Date
             row = [
                 phone,
-                str(user_id),
                 datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             ]
             
-            worksheet.append_row(row)
+            # Find the next available row in Column A
+            next_row = len(worksheet.col_values(1)) + 1
+            
+            # Explicitly define the range A{row}:B{row}
+            # Columns: A, B (2 columns)
+            target_range = f"A{next_row}:B{next_row}"
+            
+            logger.info(f"📝 Writing waitlist entry to {target_range}")
+            
+            worksheet.update(target_range, [row])
             return True
         except Exception as e:
             logger.error(f"❌ Ошибка добавления в лист ожидания: {e}")
