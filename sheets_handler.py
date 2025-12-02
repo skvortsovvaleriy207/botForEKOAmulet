@@ -85,7 +85,6 @@ class GoogleSheetsHandler:
             # Columns: Payment ID, User ID, FIO, Address, Phone, Product, Price, Status, Ref Code, Date
             row = [
                 payment_id,
-                str(user_id),
                 fio,
                 address,
                 phone,

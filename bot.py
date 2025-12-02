@@ -520,6 +520,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"💰 *Цена:* {PRODUCT_PRICE} ₽\n"
         f"🚚 *Доставка по России:* 3–5 дней\n"
         f"✅ *Решайте проблемы быстро, просто и навсегда!*\n\n"
+        f"💡 *Совет:* Введи `/help` чтобы увидеть все доступные команды\n\n"
         f"Чтобы оформить заказ, нажмите кнопку ниже:"
     )
 
@@ -529,12 +530,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await update.message.reply_text(welcome_text, reply_markup=reply_markup, parse_mode="Markdown")
-    
-    await asyncio.sleep(0.3)
-    await update.message.reply_text(
-        "💡 *Совет:* Введи `/help` чтобы увидеть все доступные команды",
-        parse_mode="Markdown"
-    )
     
     return ConversationHandler.END
 
@@ -1230,8 +1225,10 @@ async def handle_unexpected_input(update: Update, context: ContextTypes.DEFAULT_
     
     logger.info(f"📨 Сообщение от {user.id}: {user_text}")
     
-    # Запускаем /start
-    await start(update, context)
+    # Вместо /start отправляем простое сообщение без /help
+    await update.message.reply_text(
+        "Извините, я не понял это сообщение. Введите /start, чтобы начать заново."
+    )
 
 async def handle_callback_error(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """⚠️ Обработка ошибочных callback'ов"""
@@ -1258,6 +1255,7 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> N
     """Глобальный обработчик ошибок"""
     logger.error(msg="Exception while handling an update:", exc_info=context.error)
 
+
 # ============================================================================
 # ЗАПУСК БОТА
 # ============================================================================
@@ -1268,9 +1266,40 @@ def main():
 
     logger.info("🚀 Запуск бота ЭКОамулет v4.0 PRODUCTION-READY...")
 
-    application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
+    async def post_init(application: Application):
+        """✅ Действия после инициализации"""
+        logger.info("✅ Бот запущен и готов к работе!")
+        
+        # Check bot identity
+        try:
+            me = await application.bot.get_me()
+            logger.info(f"🤖 Bot Username: @{me.username}")
+            logger.info(f"🆔 Bot ID: {me.id}")
+        except Exception as e:
+            logger.error(f"❌ Failed to get bot identity: {e}")
+
+        logger.info(f"👤 Admin ID: {ADMIN_TELEGRAM_ID}")
+        logger.info(f"💬 Admin Chat ID: {ADMIN_CHAT_ID}")
+        logger.info(f"🛍️ Товар: {PRODUCT_NAME} ({PRODUCT_PRICE} ₽)")
+        logger.info(f"🔄 Режим: E-COMMERCE (PRODUCTION-READY)")
+        if SHEETS_AVAILABLE and sheets:
+            logger.info(f"📊 Google Sheets: ПОДКЛЮЧЕНА ✅")
+        else:
+            logger.info(f"⚠️ Google Sheets: НЕ ПОДКЛЮЧЕНА (используется локальное хранилище)")
+
+        # ✅ Set Bot Commands (Menu Button)
+        commands = [
+            ("start", "🏠 Главное меню"),
+            ("help", "❓ Помощь и справка"),
+            ("stock", "📦 Проверить наличие (Admin)"),
+        ]
+        await application.bot.set_my_commands(commands)
+        logger.info("✅ Команды бота установлены (Menu Button)")
+
+    application = Application.builder().token(TELEGRAM_BOT_TOKEN).post_init(post_init).build()
 
     event_loop = asyncio.new_event_loop()
+
 
     # ConversationHandler для заказов
     conv_handler = ConversationHandler(
@@ -1326,16 +1355,6 @@ def main():
     
     # 4️⃣ Error handler
     application.add_error_handler(error_handler)
-
-    logger.info("✅ Бот запущен и готов к работе!")
-    logger.info(f"👤 Admin ID: {ADMIN_TELEGRAM_ID}")
-    logger.info(f"💬 Admin Chat ID: {ADMIN_CHAT_ID}")
-    logger.info(f"🛍️ Товар: {PRODUCT_NAME} ({PRODUCT_PRICE} ₽)")
-    logger.info(f"🔄 Режим: E-COMMERCE (PRODUCTION-READY)")
-    if SHEETS_AVAILABLE and sheets:
-        logger.info(f"📊 Google Sheets: ПОДКЛЮЧЕНА ✅")
-    else:
-        logger.info(f"⚠️ Google Sheets: НЕ ПОДКЛЮЧЕНА (используется локальное хранилище)")
 
     logger.info("📡 Запуск polling...")
     application.run_polling()
