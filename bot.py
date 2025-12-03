@@ -36,6 +36,8 @@ import hashlib
 from datetime import datetime
 from typing import Optional
 from functools import wraps
+from yookassa import Configuration, Payment
+import uuid
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, BotCommand
 from telegram.ext import (
@@ -87,6 +89,10 @@ if not ADMIN_CHAT_ID:
     raise ValueError("❌ ADMIN_CHAT_ID не установлен в .env!")
 if not YOOKASSA_API_KEY or not YOOKASSA_SHOP_ID:
     raise ValueError("❌ YOOKASSA_API_KEY или YOOKASSA_SHOP_ID не установлены в .env!")
+
+# Настройка ЮКассы
+Configuration.account_id = YOOKASSA_SHOP_ID
+Configuration.secret_key = YOOKASSA_API_KEY
 
 from logging.handlers import TimedRotatingFileHandler
 
@@ -756,10 +762,31 @@ async def confirm_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     phone = context.user_data.get('phone')
     
     try:
-        # 1️⃣ ГЕНЕРИРУЕМ УНИКАЛЬНЫЙ PAYMENT_ID
-        payment_id = f"PAY_{user.id}_{int(datetime.now().timestamp())}"
+        # 1️⃣ ГЕНЕРИРУЕМ УНИКАЛЬНЫЙ ID ЗАКАЗА (для идемпотентности)
+        idempotence_key = str(uuid.uuid4())
         
-        # 2️⃣ СОХРАНЯЕМ В PENDING (перед попыткой уменьшить остаток)
+        # 2️⃣ СОЗДАЕМ ПЛАТЕЖ В ЮКАССЕ
+        payment = Payment.create({
+            "amount": {
+                "value": str(PRODUCT_PRICE),
+                "currency": "RUB"
+            },
+            "confirmation": {
+                "type": "redirect",
+                "return_url": "https://t.me/your_bot_username" # Лучше заменить на реальную ссылку на бота
+            },
+            "capture": True,
+            "description": f"Заказ {PRODUCT_NAME} для {phone}",
+            "metadata": {
+                "user_id": user.id,
+                "phone": phone
+            }
+        }, idempotence_key)
+        
+        payment_id = payment.id
+        confirmation_url = payment.confirmation.confirmation_url
+        
+        # 3️⃣ СОХРАНЯЕМ В PENDING
         PENDING_PAYMENTS[payment_id] = {
             'user_id': user.id,
             'fio': fio,
@@ -768,7 +795,7 @@ async def confirm_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
             'status': 'pending',
             'created_at': datetime.now().isoformat()
         }
-        logger.info(f"📝 Заказ {payment_id} добавлен в PENDING_PAYMENTS")
+        logger.info(f"📝 Заказ {payment_id} создан в ЮКассе и добавлен в PENDING_PAYMENTS")
         
         # 3️⃣ ПЫТАЕМСЯ УМЕНЬШИТЬ ОСТАТОК ОДНОВРЕМЕННО С ДОБАВЛЕНИЕМ В ТАБЛИЦУ
         # ⚠️ ВАЖНО: Сначала уменьшаем остаток, потом записываем
@@ -811,16 +838,15 @@ async def confirm_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         # ✅ ВСЕ УСПЕШНО! Показываем ссылку на оплату
         payment_text = (
-            f"💳 Оплата заказа №{payment_id}\n\n"
-            f"🔗 Ссылка для оплаты:\n"
-            f"(В реальном проекте здесь будет ссылка ЮКассы)\n\n"
-            f"💰 Сумма: {PRODUCT_PRICE} ₽"
+            f"💳 Оплата заказа\n\n"
+            f"� Сумма: {PRODUCT_PRICE} ₽\n"
+            f"🔗 Для оплаты нажмите кнопку ниже:"
         )
         
         keyboard = [[
             InlineKeyboardButton(
                 f"💳 ОПЛАТИТЬ {PRODUCT_PRICE} РУБ",
-                callback_data=f"pay_{payment_id}"
+                url=confirmation_url
             )
         ]]
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -1375,8 +1401,40 @@ def main():
     # 4️⃣ Error handler
     application.add_error_handler(error_handler)
 
-    logger.info("📡 Запуск polling...")
-    application.run_polling()
+    # ✅ ЗАПУСК ВЕБ-СЕРВЕРА И БОТА
+    # Настраиваем веб-сервер для webhook'ов
+    app = web.Application()
+    app.router.add_post('/webhook', handle_yookassa_webhook)
+    
+    # Запускаем все вместе
+    async def run_app_and_bot():
+        # Настройка runner'а для aiohttp
+        runner = web.AppRunner(app)
+        await runner.setup()
+        site = web.TCPSite(runner, '0.0.0.0', 8080) # Порт 8080, можно вынести в .env
+        await site.start()
+        logger.info("🌍 Webhook server started on port 8080")
+        
+        # Запуск polling бота
+        logger.info("📡 Запуск polling...")
+        await application.updater.start_polling()
+        await application.start()
+        
+        # Бесконечный цикл, чтобы программа не завершилась
+        # В реальном проде лучше использовать signal handlers для graceful shutdown
+        try:
+            while True:
+                await asyncio.sleep(3600)
+        except asyncio.CancelledError:
+            logger.info("🛑 Stopping...")
+            await application.updater.stop()
+            await application.stop()
+            await runner.cleanup()
+
+    try:
+        event_loop.run_until_complete(run_app_and_bot())
+    except KeyboardInterrupt:
+        pass
 
 if __name__ == '__main__':
     main()
