@@ -88,15 +88,29 @@ if not ADMIN_CHAT_ID:
 if not YOOKASSA_API_KEY or not YOOKASSA_SHOP_ID:
     raise ValueError("❌ YOOKASSA_API_KEY или YOOKASSA_SHOP_ID не установлены в .env!")
 
+from logging.handlers import TimedRotatingFileHandler
+
 # ============================================================================
 # ЛОГИРОВАНИЕ
 # ============================================================================
+
+# Настройка ротации логов: каждый день новый файл
+# Активный файл: bot.log
+# Архивы: bot.log.DD_MM_YY
+log_handler = TimedRotatingFileHandler(
+    filename='bot.log',
+    when='midnight',
+    interval=1,
+    backupCount=30,  # Хранить логи за последние 30 дней
+    encoding='utf-8'
+)
+log_handler.suffix = "%d_%m_%y"  # Формат даты в имени файла при ротации
 
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('bot.log'),
+        log_handler,
         logging.StreamHandler()
     ]
 )
@@ -311,7 +325,7 @@ async def process_successful_payment(payment_id: str) -> bool:
             f"📍 *Доставка по адресу:*\n"
             f"{address}\n\n"
             f"Ожидайте товар в течение 3-5 дней.\n"
-            f"Мы отправим вам трек-номер в отдельном сообщении."
+
         )
         
         await send_user_notification(user_id, confirmation_text)
