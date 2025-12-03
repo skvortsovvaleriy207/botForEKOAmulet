@@ -82,7 +82,7 @@ class GoogleSheetsHandler:
         try:
             worksheet = self.sheet.worksheet(self.SHEET_ORDERS)
             
-            # Columns: Payment ID, FIO, Address, Phone, Product, Price, Status, Ref Code, Date
+            # Columns: Payment ID, FIO, Address, Phone, Product, Price, Status, Date
             row = [
                 payment_id,
                 fio,
@@ -91,7 +91,6 @@ class GoogleSheetsHandler:
                 product,
                 price,
                 status,
-                ref_code if ref_code else "",
                 datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             ]
             
@@ -99,9 +98,9 @@ class GoogleSheetsHandler:
             # col_values(1) returns all values in the first column
             next_row = len(worksheet.col_values(1)) + 1
             
-            # Explicitly define the range A{row}:I{row} to force correct placement
-            # Columns: A, B, C, D, E, F, G, H, I (9 columns)
-            target_range = f"A{next_row}:I{next_row}"
+            # Explicitly define the range A{row}:H{row} to force correct placement
+            # Columns: A, B, C, D, E, F, G, H (8 columns)
+            target_range = f"A{next_row}:H{next_row}"
             
             logger.info(f"📝 Writing order to {target_range}")
             
