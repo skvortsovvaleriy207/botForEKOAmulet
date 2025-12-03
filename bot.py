@@ -101,11 +101,23 @@ Configuration.secret_key = YOOKASSA_API_KEY
 # ЛОГИРОВАНИЕ
 # ============================================================================
 
+# Настройка ротации логов: каждый день новый файл
+# Активный файл: bot.log
+# Архивы: bot.log.DD_MM_YY
+log_handler = TimedRotatingFileHandler(
+    filename='bot.log',
+    when='midnight',
+    interval=1,
+    backupCount=30,  # Хранить логи за последние 30 дней
+    encoding='utf-8'
+)
+log_handler.suffix = "%d_%m_%y"  # Формат даты в имени файла при ротации
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('bot.log'),
+        log_handler,
         logging.StreamHandler()
     ]
 )
@@ -334,20 +346,24 @@ async def process_successful_payment(payment_id: str) -> bool:
     
     if success:
         # ✅ ОТПРАВЛЯЕМ ПОДТВЕРЖДЕНИЕ КЛИЕНТУ
-        confirmation_text = (
-            f"✅ *Спасибо за покупку!*\n\n"
-            f"Ваш заказ успешно оплачен!\n\n"
+        # 1. Спасибо за покупку
+        await send_user_notification(user_id, "✅ *Спасибо за покупку!*")
+        
+        # 2. Эко-сообщение
+        await send_user_notification(user_id, "🍃 Вы только что приняли осознанное решение для себя и для природы. Пока амулет готовится к отправке, ваше доброе дело уже в силе!")
+
+        # 3. Детали заказа
+        details_text = (
             f"📦 *Детали заказа:*\n"
             f"🛍️ Товар: {PRODUCT_NAME}\n"
             f"💰 Сумма: {PRODUCT_PRICE} ₽\n"
             f"🆔 ID заказа: {payment_id}\n\n"
             f"📍 *Доставка по адресу:*\n"
             f"{address}\n\n"
-            f"Ожидайте товар в течение 3-5 дней.\n"
-            f"Мы отправим вам трек-номер в отдельном сообщении."
+            f"Ожидайте товар в течение 3-5 дней."
         )
         
-        await send_user_notification(user_id, confirmation_text)
+        await send_user_notification(user_id, details_text)
         
         # ✅ УВЕДОМЛЯЕМ АДМИНА
         admin_notification = (
@@ -541,33 +557,26 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if context.args:
         logger.info(f"🔗 DeepLink параметр получен: {context.args}")
 
+    # Получаем актуальный остаток
+    stock_quantity = await get_stock()
+
     welcome_text = (
-        f"✨ *{PRODUCT_NAME} — ваш карманный мастер и универсальный ремонтный комплект!*\n\n"
-        f"🔧 *Что это и как работает?*\n\n"
-        f"🌟 *Особенности:*\n"
-        f"• Универсальный термомокомпозит: Нагрел — Спелил нужную деталь — Охладил → Готово!\n"
-        f"• Прочная пластика: Выдерживает серьезные нагрузки, не ломается.\n"
-        f"• Многоразовый: Нагрел снова — переделал. Одна покупка = сотни задач.\n"
-        f"• Безопасный: Не токсичен, можно использовать в быту и для творчества с детьми.\n"
-        f"• Экологичный: Меньше одноразового хлама — чище планета.\n\n"
-        f"💰 *Цена:* {PRODUCT_PRICE} ₽\n"
-        f"🚚 *Доставка по России:* 3–5 дней\n"
-        f"✅ *Решайте проблемы быстро, просто и навсегда!*\n\n"
-        f"Чтобы оформить заказ, нажмите кнопку ниже:"
+        f"👋 Привет, {user.first_name}! Добро пожаловать в магазин ЭКОамулета!\n\n"
+        f"🔮 **ЭКОамулет** — твой карманный мастер.\n"
+        f"⚙️ **Как работает:** Нагрел → Слепил → Готово!\n"
+        f"✅ **Плюсы:** Прочный, многоразовый, безопасный.\n"
+        f"🌿 Прочный инструмент для тех, кто ценит и вещи, и природу.\n\n"
+        f"🛍 **Товар:** ЭКОамулет — {PRODUCT_PRICE} ₽\n"
+        f"📦 **Осталось:** {stock_quantity} шт.\n\n"
+        f"👇 Нажми кнопку ниже, чтобы оформить заказ:"
     )
 
     keyboard = [[
-        InlineKeyboardButton("🛒 Оформить заказ", callback_data='buy_product')
+        InlineKeyboardButton(" КУПИТЬ", callback_data='buy_product')
     ]]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await update.message.reply_text(welcome_text, reply_markup=reply_markup, parse_mode="Markdown")
-    
-    await asyncio.sleep(0.3)
-    await update.message.reply_text(
-        "💡 *Совет:* Введи `/help` чтобы увидеть все доступные команды",
-        parse_mode="Markdown"
-    )
     
     return ConversationHandler.END
 
@@ -860,8 +869,11 @@ async def confirm_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         
         await query.message.reply_text(
-            f"💬 После оплаты я пришлю вам подтверждение и чек.\n"
-            f"Обычно доставка занимает 3–5 дней."
+            f"🌿 Ваша покупка — это прямой вклад в чистоту планеты. Каждый ЭКОамулет заменяет сотни одноразовых вещей."
+        )
+
+        await query.message.reply_text(
+            f"💬 После оплаты я пришлю вам подтверждение и чек. Обычно доставка занимает 3–5 дней."
         )
         
         logger.info(f"✅ Заказ {payment_id} создан и ждет оплаты")
@@ -1270,8 +1282,10 @@ async def handle_unexpected_input(update: Update, context: ContextTypes.DEFAULT_
     
     logger.info(f"📨 Сообщение от {user.id}: {user_text}")
     
-    # Запускаем /start
-    await start(update, context)
+    # Вместо /start отправляем простое сообщение без /help
+    await update.message.reply_text(
+        "Извините, я не понял это сообщение. Введите /start, чтобы начать заново."
+    )
 
 async def handle_callback_error(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """⚠️ Обработка ошибочных callback'ов"""
@@ -1298,6 +1312,7 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> N
     """Глобальный обработчик ошибок"""
     logger.error(msg="Exception while handling an update:", exc_info=context.error)
 
+
 # ============================================================================
 # ЗАПУСК БОТА
 # ============================================================================
@@ -1308,14 +1323,46 @@ def main():
 
     logger.info("🚀 Запуск бота ЭКОамулет v4.0 PRODUCTION-READY...")
 
-    application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
+    async def post_init(application: Application):
+        """✅ Действия после инициализации"""
+        logger.info("✅ Бот запущен и готов к работе!")
+        
+        # Check bot identity
+        try:
+            me = await application.bot.get_me()
+            logger.info(f"🤖 Bot Username: @{me.username}")
+            logger.info(f"🆔 Bot ID: {me.id}")
+        except Exception as e:
+            logger.error(f"❌ Failed to get bot identity: {e}")
+
+        logger.info(f"👤 Admin ID: {ADMIN_TELEGRAM_ID}")
+        logger.info(f"💬 Admin Chat ID: {ADMIN_CHAT_ID}")
+        logger.info(f"🛍️ Товар: {PRODUCT_NAME} ({PRODUCT_PRICE} ₽)")
+        logger.info(f"🔄 Режим: E-COMMERCE (PRODUCTION-READY)")
+        if SHEETS_AVAILABLE and sheets:
+            logger.info(f"📊 Google Sheets: ПОДКЛЮЧЕНА ✅")
+        else:
+            logger.info(f"⚠️ Google Sheets: НЕ ПОДКЛЮЧЕНА (используется локальное хранилище)")
+
+        # ✅ Set Bot Commands (Menu Button)
+        commands = [
+            ("start", "🏠 Главное меню"),
+            ("help", "❓ Помощь и справка"),
+            ("stock", "📦 Проверить наличие (Admin)"),
+        ]
+        await application.bot.set_my_commands(commands)
+        logger.info("✅ Команды бота установлены (Menu Button)")
+
+    application = Application.builder().token(TELEGRAM_BOT_TOKEN).post_init(post_init).build()
 
     event_loop = asyncio.new_event_loop()
+
 
     # ConversationHandler для заказов
     conv_handler = ConversationHandler(
         entry_points=[
             CommandHandler('start', start),
+            CommandHandler('help', help_command),
             CallbackQueryHandler(button_buy_product, pattern='^buy_product$'),
         ],
         states={
@@ -1348,8 +1395,6 @@ def main():
     # 🔧 ПОРЯДОК ОБРАБОТЧИКОВ КРИТИЧЕН!
     
     # 1️⃣ КОМАНДЫ
-    application.add_handler(CommandHandler('start', start))
-    application.add_handler(CommandHandler('help', help_command))
     application.add_handler(CommandHandler('setstock', cmd_setstock))
     application.add_handler(CommandHandler('stock', cmd_stock))
     application.add_handler(CommandHandler('notify_waitlist', cmd_notify_waitlist))
@@ -1366,16 +1411,6 @@ def main():
     
     # 4️⃣ Error handler
     application.add_error_handler(error_handler)
-
-    logger.info("✅ Бот запущен и готов к работе!")
-    logger.info(f"👤 Admin ID: {ADMIN_TELEGRAM_ID}")
-    logger.info(f"💬 Admin Chat ID: {ADMIN_CHAT_ID}")
-    logger.info(f"🛍️ Товар: {PRODUCT_NAME} ({PRODUCT_PRICE} ₽)")
-    logger.info(f"🔄 Режим: E-COMMERCE (PRODUCTION-READY)")
-    if SHEETS_AVAILABLE and sheets:
-        logger.info(f"📊 Google Sheets: ПОДКЛЮЧЕНА ✅")
-    else:
-        logger.info(f"⚠️ Google Sheets: НЕ ПОДКЛЮЧЕНА (используется локальное хранилище)")
 
     logger.info("📡 Запуск polling...")
     application.run_polling()
