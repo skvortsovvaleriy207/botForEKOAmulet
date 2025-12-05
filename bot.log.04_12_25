@@ -1,0 +1,292 @@
+2025-12-04 19:30:48,152 - sheets_handler - INFO - ✅ Успешное подключение к Google Sheets
+2025-12-04 19:30:48,152 - __main__ - INFO - ✅ Google Sheets подключен!
+2025-12-04 19:30:48,153 - __main__ - INFO - 🚀 Запуск бота ЭКОамулет v4.0 PRODUCTION-READY...
+2025-12-04 19:30:48,203 - __main__ - INFO - 📡 Запуск polling...
+2025-12-04 19:30:49,428 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getMe "HTTP/1.1 200 OK"
+2025-12-04 19:30:49,429 - __main__ - INFO - ✅ Бот запущен и готов к работе!
+2025-12-04 19:30:49,713 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getMe "HTTP/1.1 200 OK"
+2025-12-04 19:30:49,714 - __main__ - INFO - 🤖 Bot Username: @svalery_telegram_task_bot
+2025-12-04 19:30:49,715 - __main__ - INFO - 🆔 Bot ID: 8464975265
+2025-12-04 19:30:49,715 - __main__ - INFO - 👤 Admin ID: 631198674
+2025-12-04 19:30:49,715 - __main__ - INFO - 💬 Admin Chat ID: 631198674
+2025-12-04 19:30:49,715 - __main__ - INFO - 🛍️ Товар: ЭКОамулет (1500 ₽)
+2025-12-04 19:30:49,715 - __main__ - INFO - 🔄 Режим: E-COMMERCE (PRODUCTION-READY)
+2025-12-04 19:30:49,715 - __main__ - INFO - 📊 Google Sheets: ПОДКЛЮЧЕНА ✅
+2025-12-04 19:30:50,062 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/setMyCommands "HTTP/1.1 200 OK"
+2025-12-04 19:30:50,063 - __main__ - INFO - ✅ Команды бота установлены (Menu Button)
+2025-12-04 19:30:50,347 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/deleteWebhook "HTTP/1.1 200 OK"
+2025-12-04 19:30:50,348 - telegram.ext.Application - INFO - Application started
+2025-12-04 19:31:01,291 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:31:11,573 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:31:21,883 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:31:32,177 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:31:42,492 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:31:52,774 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:32:03,072 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:32:13,414 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:32:23,760 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:32:34,039 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:32:44,338 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:32:54,683 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:33:05,036 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:33:15,365 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:33:25,709 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:33:36,050 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:33:46,337 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:33:56,631 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:34:01,148 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:34:01,150 - __main__ - INFO - 👤 Пользователь 631198674 запустил /start
+2025-12-04 19:34:01,151 - __main__ - INFO - 🔄 Состояние пользователя 631198674 полностью сброшено
+2025-12-04 19:34:01,752 - __main__ - INFO - 📦 Остаток из Google Sheets: 9
+2025-12-04 19:34:02,987 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/sendMessage "HTTP/1.1 200 OK"
+2025-12-04 19:34:05,850 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:34:06,168 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/answerCallbackQuery "HTTP/1.1 200 OK"
+2025-12-04 19:34:06,169 - __main__ - INFO - 🛒 Пользователь 631198674 нажал 'КУПИТЬ'
+2025-12-04 19:34:06,725 - __main__ - INFO - 📦 Остаток из Google Sheets: 9
+2025-12-04 19:34:06,725 - __main__ - INFO - ✅ Товар в наличии: 9 шт.
+2025-12-04 19:34:07,074 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/editMessageText "HTTP/1.1 200 OK"
+2025-12-04 19:34:07,998 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/sendMessage "HTTP/1.1 200 OK"
+2025-12-04 19:34:16,135 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:34:24,121 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:34:24,123 - __main__ - INFO - ✅ Телефон получен: 89345670123
+2025-12-04 19:34:25,097 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/sendMessage "HTTP/1.1 200 OK"
+2025-12-04 19:34:34,414 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:34:42,711 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:34:42,714 - __main__ - INFO - ✅ ФИО получено: Иванов Иван Иванович
+2025-12-04 19:34:43,703 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/sendMessage "HTTP/1.1 200 OK"
+2025-12-04 19:34:52,992 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:35:03,396 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:35:04,710 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:35:06,298 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/sendMessage "HTTP/1.1 200 OK"
+2025-12-04 19:35:15,067 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:35:17,549 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:35:19,065 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/sendMessage "HTTP/1.1 200 OK"
+2025-12-04 19:35:27,843 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:35:37,390 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:35:37,393 - __main__ - INFO - ✅ Адрес получен: Россия цкцукцкцукцук
+2025-12-04 19:35:38,426 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/sendMessage "HTTP/1.1 200 OK"
+2025-12-04 19:35:47,733 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:35:48,127 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:35:49,127 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/answerCallbackQuery "HTTP/1.1 200 OK"
+2025-12-04 19:35:49,128 - __main__ - INFO - ✅ Пользователь 631198674 подтвердил заказ
+2025-12-04 19:35:49,128 - __main__ - INFO - 📝 Заказ PAY_631198674_1764866149 добавлен в PENDING_PAYMENTS
+2025-12-04 19:35:49,958 - __main__ - INFO - 📦 Остаток из Google Sheets: 9
+2025-12-04 19:35:50,567 - __main__ - INFO - ✅ Остаток установлен в Google Sheets: 8
+2025-12-04 19:35:50,567 - __main__ - INFO - ✅ Остаток уменьшен: 9 → 8
+2025-12-04 19:35:50,567 - __main__ - INFO - 📝 Попытка 1/3 добавить заказ PAY_631198674_1764866149
+2025-12-04 19:35:51,107 - sheets_handler - INFO - 📝 Writing order to A11:H11
+2025-12-04 19:35:51,399 - __main__ - INFO - ✅ Заказ PAY_631198674_1764866149 добавлен в Google Sheets
+2025-12-04 19:35:51,709 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/editMessageText "HTTP/1.1 200 OK"
+2025-12-04 19:35:52,133 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/sendMessage "HTTP/1.1 200 OK"
+2025-12-04 19:35:52,466 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/sendMessage "HTTP/1.1 200 OK"
+2025-12-04 19:35:52,467 - __main__ - INFO - ✅ Заказ PAY_631198674_1764866149 создан и ждет оплаты
+2025-12-04 19:35:52,467 - __main__ - INFO - 📤 Отправляю сообщение в админский чат (631198674): 📦 НОВЫЙ ЗАКАЗ СОЗДАН
+
+🆔 ID: PAY_631198674_17648661...
+2025-12-04 19:35:52,788 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/sendMessage "HTTP/1.1 200 OK"
+2025-12-04 19:35:52,790 - __main__ - INFO - ✅ Сообщение успешно отправлено в админский чат!
+2025-12-04 19:35:58,417 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:35:59,928 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:36:01,011 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/answerCallbackQuery "HTTP/1.1 200 OK"
+2025-12-04 19:36:01,012 - __main__ - INFO - 💳 Пользователь 631198674 симулирует оплату заказа PAY_631198674_1764866149
+2025-12-04 19:36:01,309 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/editMessageText "HTTP/1.1 200 OK"
+2025-12-04 19:36:01,310 - __main__ - INFO - 📝 Попытка 1/3 обновить статус PAY_631198674_1764866149
+2025-12-04 19:36:02,117 - __main__ - INFO - ✅ Статус PAY_631198674_1764866149 обновлен на 'Успешно оплачено'
+2025-12-04 19:36:02,444 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/sendMessage "HTTP/1.1 200 OK"
+2025-12-04 19:36:02,445 - __main__ - INFO - ✅ Уведомление отправлено пользователю 631198674
+2025-12-04 19:36:02,768 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/sendMessage "HTTP/1.1 200 OK"
+2025-12-04 19:36:02,769 - __main__ - INFO - ✅ Уведомление отправлено пользователю 631198674
+2025-12-04 19:36:03,142 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/sendMessage "HTTP/1.1 200 OK"
+2025-12-04 19:36:03,143 - __main__ - INFO - ✅ Уведомление отправлено пользователю 631198674
+2025-12-04 19:36:03,143 - __main__ - INFO - 📤 Отправляю сообщение в админский чат (631198674): ✅ ПЛАТЕЖ УСПЕШЕН!
+
+🆔 ID платежа: PAY_631198674_176...
+2025-12-04 19:36:03,456 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/sendMessage "HTTP/1.1 200 OK"
+2025-12-04 19:36:03,457 - __main__ - INFO - ✅ Сообщение успешно отправлено в админский чат!
+2025-12-04 19:36:03,462 - __main__ - INFO - ✅ Заказ PAY_631198674_1764866149 обработан успешно!
+2025-12-04 19:36:03,774 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/sendMessage "HTTP/1.1 200 OK"
+2025-12-04 19:36:10,210 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:36:20,601 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:36:30,943 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:36:41,611 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:36:51,897 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:37:02,275 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:37:12,587 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:37:22,867 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:37:33,150 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:37:43,445 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:37:53,729 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:38:04,037 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:38:14,363 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:38:24,710 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:38:35,048 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:38:45,390 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:38:55,676 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 19:38:59,378 - asyncio - ERROR - Task was destroyed but it is pending!
+task: <Task pending name='Application:8464975265:update_fetcher' coro=<Application._update_fetcher() running at /home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/telegram/ext/_application.py:1110> wait_for=<Future pending cb=[Task.task_wakeup()]>>
+2025-12-04 21:05:59,705 - sheets_handler - INFO - ✅ Успешное подключение к Google Sheets
+2025-12-04 21:05:59,705 - __main__ - INFO - ✅ Google Sheets подключен!
+2025-12-04 21:05:59,705 - __main__ - INFO - 🚀 Запуск бота ЭКОамулет v4.0 PRODUCTION-READY...
+2025-12-04 21:05:59,762 - __main__ - INFO - 📡 Запуск polling...
+2025-12-04 21:06:01,969 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getMe "HTTP/1.1 200 OK"
+2025-12-04 21:06:01,971 - __main__ - INFO - ✅ Бот запущен и готов к работе!
+2025-12-04 21:06:02,269 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getMe "HTTP/1.1 200 OK"
+2025-12-04 21:06:02,269 - __main__ - INFO - 🤖 Bot Username: @svalery_telegram_task_bot
+2025-12-04 21:06:02,269 - __main__ - INFO - 🆔 Bot ID: 8464975265
+2025-12-04 21:06:02,269 - __main__ - INFO - 👤 Admin ID: 631198674
+2025-12-04 21:06:02,270 - __main__ - INFO - 💬 Admin Chat ID: 631198674
+2025-12-04 21:06:02,270 - __main__ - INFO - 🛍️ Товар: ЭКОамулет (1500 ₽)
+2025-12-04 21:06:02,270 - __main__ - INFO - 🔄 Режим: E-COMMERCE (PRODUCTION-READY)
+2025-12-04 21:06:02,270 - __main__ - INFO - 📊 Google Sheets: ПОДКЛЮЧЕНА ✅
+2025-12-04 21:06:03,593 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/setMyCommands "HTTP/1.1 200 OK"
+2025-12-04 21:06:03,594 - __main__ - INFO - ✅ Команды бота установлены (Menu Button)
+2025-12-04 21:06:03,878 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/deleteWebhook "HTTP/1.1 200 OK"
+2025-12-04 21:06:03,880 - telegram.ext.Application - INFO - Application started
+2025-12-04 21:06:15,063 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 21:06:25,349 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 21:06:32,062 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 21:06:32,064 - __main__ - INFO - 👤 Пользователь 631198674 запустил /start
+2025-12-04 21:06:32,064 - __main__ - INFO - 🔄 Состояние пользователя 631198674 полностью сброшено
+2025-12-04 21:06:33,861 - __main__ - INFO - 📦 Остаток из Google Sheets: 8
+2025-12-04 21:06:35,400 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/sendMessage "HTTP/1.1 200 OK"
+2025-12-04 21:06:41,456 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 21:06:42,916 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/answerCallbackQuery "HTTP/1.1 200 OK"
+2025-12-04 21:06:42,917 - __main__ - INFO - 🛒 Пользователь 631198674 нажал 'КУПИТЬ'
+2025-12-04 21:06:43,494 - __main__ - INFO - 📦 Остаток из Google Sheets: 8
+2025-12-04 21:06:43,494 - __main__ - INFO - ✅ Товар в наличии: 8 шт.
+2025-12-04 21:06:43,808 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/editMessageText "HTTP/1.1 200 OK"
+2025-12-04 21:06:44,759 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/sendMessage "HTTP/1.1 200 OK"
+2025-12-04 21:06:51,824 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 21:06:54,220 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 21:06:54,222 - __main__ - INFO - ✅ Телефон получен: 89234567809
+2025-12-04 21:06:57,051 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/sendMessage "HTTP/1.1 200 OK"
+2025-12-04 21:07:04,522 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 21:07:12,612 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 21:07:12,615 - __main__ - INFO - ✅ ФИО получено: Иванов Иван Иванович
+2025-12-04 21:07:14,794 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/sendMessage "HTTP/1.1 200 OK"
+2025-12-04 21:07:23,161 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 21:07:33,451 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 21:07:44,471 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 21:07:50,204 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 21:07:50,207 - __main__ - INFO - ✅ Адрес получен: 1234456 Тверь Московский проспект 22 д. 12
+2025-12-04 21:07:51,727 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/sendMessage "HTTP/1.1 200 OK"
+2025-12-04 21:08:00,540 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 21:08:10,876 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 21:08:21,233 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 21:08:31,546 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 21:08:32,647 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 21:08:37,653 - __main__ - ERROR - Exception while handling an update:
+Traceback (most recent call last):
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/httpx/_transports/default.py", line 66, in map_httpcore_exceptions
+    yield
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/httpx/_transports/default.py", line 366, in handle_async_request
+    resp = await self._pool.handle_async_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/httpcore/_async/connection_pool.py", line 256, in handle_async_request
+    raise exc from None
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/httpcore/_async/connection_pool.py", line 236, in handle_async_request
+    response = await connection.handle_async_request(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/httpcore/_async/connection.py", line 101, in handle_async_request
+    raise exc
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/httpcore/_async/connection.py", line 78, in handle_async_request
+    stream = await self._connect(request)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/httpcore/_async/connection.py", line 124, in _connect
+    stream = await self._network_backend.connect_tcp(**kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/httpcore/_backends/auto.py", line 31, in connect_tcp
+    return await self._backend.connect_tcp(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/httpcore/_backends/anyio.py", line 113, in connect_tcp
+    with map_exceptions(exc_map):
+  File "/usr/lib/python3.12/contextlib.py", line 158, in __exit__
+    self.gen.throw(value)
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/httpcore/_exceptions.py", line 14, in map_exceptions
+    raise to_exc(exc) from exc
+httpcore.ConnectTimeout
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/telegram/request/_httpxrequest.py", line 219, in do_request
+    res = await self._client.request(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/httpx/_client.py", line 1530, in request
+    return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/httpx/_client.py", line 1617, in send
+    response = await self._send_handling_auth(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/httpx/_client.py", line 1645, in _send_handling_auth
+    response = await self._send_handling_redirects(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/httpx/_client.py", line 1682, in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/httpx/_client.py", line 1719, in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/httpx/_transports/default.py", line 365, in handle_async_request
+    with map_httpcore_exceptions():
+  File "/usr/lib/python3.12/contextlib.py", line 158, in __exit__
+    self.gen.throw(value)
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/httpx/_transports/default.py", line 83, in map_httpcore_exceptions
+    raise mapped_exc(message) from exc
+httpx.ConnectTimeout
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/telegram/ext/_application.py", line 1195, in process_update
+    await coroutine
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/telegram/ext/_conversationhandler.py", line 850, in handle_update
+    new_state: object = await handler.handle_update(
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/telegram/ext/_basehandler.py", line 153, in handle_update
+    return await self.callback(update, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/bot.py", line 900, in cancel_order
+    await query.answer()
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/telegram/_callbackquery.py", line 180, in answer
+    return await self.get_bot().answer_callback_query(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 785, in answer_callback_query
+    return await super().answer_callback_query(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/telegram/_bot.py", line 519, in decorator
+    result = await func(self, *args, **kwargs)  # skipcq: PYL-E1102
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/telegram/_bot.py", line 3207, in answer_callback_query
+    return await self._post(
+           ^^^^^^^^^^^^^^^^^
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/telegram/_bot.py", line 607, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 347, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/telegram/_bot.py", line 635, in _do_post
+    return await request.post(
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 168, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 288, in _request_wrapper
+    raise exc
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 278, in _request_wrapper
+    code, payload = await self.do_request(
+                    ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/skvortsovvaleriy207/Proect/Python/botForEKOAmulet/.venv/lib/python3.12/site-packages/telegram/request/_httpxrequest.py", line 236, in do_request
+    raise TimedOut from err
+telegram.error.TimedOut: Timed out
+2025-12-04 21:08:43,352 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 21:08:50,095 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 21:08:51,966 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/answerCallbackQuery "HTTP/1.1 200 OK"
+2025-12-04 21:08:51,966 - __main__ - INFO - ❌ Пользователь 631198674 отменил заказ
+2025-12-04 21:08:52,291 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/editMessageText "HTTP/1.1 200 OK"
+2025-12-04 21:09:00,438 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 21:09:11,394 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 21:09:20,015 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8464975265:AAFqBTmUzKxV1PFupOXVlnVzQrVGOp26oKs/getUpdates "HTTP/1.1 200 OK"
+2025-12-04 21:09:20,015 - telegram.ext.Application - INFO - Application is stopping. This might take a moment.
+2025-12-04 21:09:20,016 - telegram.ext.Application - INFO - Application.stop() complete
