@@ -37,7 +37,7 @@ from datetime import datetime
 from typing import Optional
 from functools import wraps
 
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, BotCommand
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, BotCommand, BotCommandScopeChat, BotCommandScopeDefault
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -1342,12 +1342,29 @@ def main():
             logger.info(f"⚠️ Google Sheets: НЕ ПОДКЛЮЧЕНА (используется локальное хранилище)")
 
         # ✅ Set Bot Commands (Menu Button)
-        commands = [
-            ("start", "🏠 Главное меню"),
-            ("help", "❓ Помощь и справка"),
-            ("stock", "📦 Проверить наличие (Admin)"),
+        # ✅ Set Bot Commands (Menu Button)
+        # 1. Для всех пользователей
+        commands_user = [
+            BotCommand("start", "🏠 Главное меню"),
+            BotCommand("help", "❓ Помощь и справка"),
         ]
-        await application.bot.set_my_commands(commands)
+        await application.bot.set_my_commands(commands_user, scope=BotCommandScopeDefault())
+        
+        # 2. Для администратора (расширенный список)
+        if ADMIN_TELEGRAM_ID:
+            commands_admin = [
+                BotCommand("start", "🏠 Главное меню"),
+                BotCommand("help", "❓ Помощь и справка"),
+                BotCommand("stock", "📦 Проверить наличие"),
+                BotCommand("setstock", "📊 Установить остаток"),
+                BotCommand("notify_waitlist", "📢 Рассылка"),
+            ]
+            try:
+                await application.bot.set_my_commands(commands_admin, scope=BotCommandScopeChat(chat_id=ADMIN_TELEGRAM_ID))
+                logger.info(f"✅ Команды администратора установлены для ID {ADMIN_TELEGRAM_ID}")
+            except Exception as e:
+                logger.error(f"❌ Не удалось установить команды админа: {e}")
+
         logger.info("✅ Команды бота установлены (Menu Button)")
 
     application = Application.builder().token(TELEGRAM_BOT_TOKEN).post_init(post_init).build()
