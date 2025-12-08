@@ -263,7 +263,7 @@ async def _set_stock_no_lock(quantity: int) -> bool:
         STOCK_DATA['quantity'] = quantity
         return True
 
-def create_yookassa_payment(amount: int, description: str, metadata: dict) -> Optional[str]:
+def create_yookassa_payment(amount: int, description: str, metadata: dict) -> tuple[Optional[str], Optional[str]]:
     """💳 Создание платежа в ЮKassa"""
     try:
         idempotence_key = str(uuid.uuid4())
@@ -274,7 +274,7 @@ def create_yookassa_payment(amount: int, description: str, metadata: dict) -> Op
             },
             "confirmation": {
                 "type": "redirect",
-                "return_url": "https://t.me/svalery_telegram_task_bot" # Замените на ссылку вашего бота
+                "return_url": BOT_RETURN_URL
             },
             "capture": True,
             "description": description,
@@ -282,10 +282,10 @@ def create_yookassa_payment(amount: int, description: str, metadata: dict) -> Op
         }, idempotence_key)
         
         logger.info(f"✅ Платеж создан в ЮKassa: {payment.id}")
-        return payment.confirmation.confirmation_url
+        return payment.id, payment.confirmation.confirmation_url
     except Exception as e:
         logger.error(f"❌ Ошибка создания платежа в ЮKassa: {e}")
-        return None
+        return None, None
 
 async def get_stock() -> int:
     """✅ Получить текущий остаток (БЕЗОПАСНО для параллельного доступа)"""
@@ -814,29 +814,19 @@ async def confirm_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     phone = context.user_data.get('phone')
     
     try:
-        # 1️⃣ ГЕНЕРИРУЕМ УНИКАЛЬНЫЙ ID ЗАКАЗА (для идемпотентности)
-        idempotence_key = str(uuid.uuid4())
-        
-        # 2️⃣ СОЗДАЕМ ПЛАТЕЖ В ЮКАССЕ
-        payment = Payment.create({
-            "amount": {
-                "value": str(PRODUCT_PRICE),
-                "currency": "RUB"
-            },
-            "confirmation": {
-                "type": "redirect",
-                "return_url": BOT_RETURN_URL
-            },
-            "capture": True,
-            "description": f"Заказ {PRODUCT_NAME} для {phone}",
-            "metadata": {
+        # 1️⃣ СОЗДАЕМ ПЛАТЕЖ В ЮКАССЕ
+        payment_id, confirmation_url = create_yookassa_payment(
+            amount=PRODUCT_PRICE,
+            description=f"Заказ {PRODUCT_NAME} для {phone}",
+            metadata={
                 "user_id": user.id,
                 "phone": phone
             }
-        }, idempotence_key)
-        
-        payment_id = payment.id
-        confirmation_url = payment.confirmation.confirmation_url
+        )
+
+        if not payment_id or not confirmation_url:
+             await query.edit_message_text("❌ Ошибка при создании платежа. Попробуйте позже.")
+             return ConversationHandler.END
         
         # 3️⃣ СОХРАНЯЕМ В PENDING
         PENDING_PAYMENTS[payment_id] = {
@@ -889,16 +879,7 @@ async def confirm_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return ConversationHandler.END
         
         # ✅ ВСЕ УСПЕШНО! Показываем ссылку на оплату
-        # Генерируем ссылку на оплату
-        payment_url = create_yookassa_payment(
-            amount=PRODUCT_PRICE,
-            description=f"Заказ {payment_id} ({PRODUCT_NAME})",
-            metadata={"payment_id": payment_id}
-        )
-        
-        if not payment_url:
-            await query.edit_message_text("❌ Ошибка при создании платежа. Попробуйте позже.")
-            return ConversationHandler.END
+
 
         payment_text = (
             f"💳 Оплата заказа\n\n"
@@ -1255,6 +1236,7 @@ async def handle_yookassa_webhook(request):
         # 1️⃣ ПОЛУЧАЕМ ДАННЫЕ
         body = await request.text()
         data = json.loads(body)
+        event = data.get('event')
         
         # 2️⃣ ПРОВЕРЯЕМ ПОДПИСЬ (БЕЗОПАСНОСТЬ!)
         # ⚠️ ЮКасса по умолчанию НЕ шлет X-Signature, если не настроен прокси.
