@@ -81,6 +81,7 @@ YOOKASSA_SHOP_ID = os.getenv('YOOKASSA_SHOP_ID')
 GOOGLE_SHEET_ID = os.getenv('GOOGLE_SHEET_ID')
 WEBHOOK_URL = os.getenv('WEBHOOK_URL', 'https://yourdomain.com')
 WEBHOOK_SECRET = os.getenv('WEBHOOK_SECRET', 'your_secret_key_change_this')
+BOT_RETURN_URL = os.getenv('BOT_RETURN_URL', 'https://t.me/svalery_telegram_task_bot')
 
 # Проверка обязательных параметров
 if not TELEGRAM_BOT_TOKEN:
@@ -612,25 +613,6 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     return ConversationHandler.END
 
-async def simulate_payment_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """💳 Симуляция оплаты при нажатии кнопки"""
-    query = update.callback_query
-    user = query.from_user
-    await query.answer()
-    
-    # data format: pay_{payment_id}
-    payment_id = query.data.replace("pay_", "")
-    
-    logger.info(f"💳 Пользователь {user.id} симулирует оплату заказа {payment_id}")
-    
-    await query.edit_message_text("⏳ Обработка платежа (симуляция)...")
-    
-    success = await process_successful_payment(payment_id)
-    
-    if success:
-        await query.message.reply_text("✅ Симуляция успешна! Платеж обработан.")
-    else:
-        await query.message.reply_text("❌ Ошибка симуляции платежа.")
 
 async def button_buy_product(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """🛒 Нажатие кнопки 'КУПИТЬ'"""
@@ -819,7 +801,7 @@ async def confirm_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
             },
             "confirmation": {
                 "type": "redirect",
-                "return_url": "https://t.me/your_bot_username" # Лучше заменить на реальную ссылку на бота
+                "return_url": BOT_RETURN_URL
             },
             "capture": True,
             "description": f"Заказ {PRODUCT_NAME} для {phone}",
@@ -1240,10 +1222,8 @@ async def handle_yookassa_webhook(request):
         data = json.loads(body)
         
         # 2️⃣ ПРОВЕРЯЕМ ПОДПИСЬ (БЕЗОПАСНОСТЬ!)
-        signature = request.headers.get('X-Signature', '')
-        if not validate_webhook_signature(signature, body):
-            logger.error("❌ Подпись webhook'а неверна!")
-            return web.Response(status=403, text="Forbidden")
+        # ⚠️ ЮКасса по умолчанию НЕ шлет X-Signature, если не настроен прокси.
+        # Самый надежный способ - проверить статус платежа через API.
         
         # 3️⃣ ОБРАБАТЫВАЕМ ПЛАТЕЖ
         payment_id = data.get('id')
@@ -1254,7 +1234,17 @@ async def handle_yookassa_webhook(request):
         
         if status == 'succeeded':
             # ✅ ПЛАТЕЖ УСПЕШЕН!
-            logger.info(f"✅ Платеж {payment_id} успешен!")
+            # 🔒 ПРОВЕРКА ЧЕРЕЗ API (Double Check)
+            try:
+                payment = Payment.find_one(payment_id)
+                if payment.status != 'succeeded':
+                    logger.error(f"❌ Фейковый webhook? API говорит статус: {payment.status}")
+                    return web.Response(status=200, text="OK") # Отвечаем ОК, чтобы не спамили
+            except Exception as e:
+                logger.error(f"❌ Ошибка проверки статуса через API: {e}")
+                return web.Response(status=500, text="Internal Server Error")
+
+            logger.info(f"✅ Платеж {payment_id} подтвержден через API!")
             
             success = await process_successful_payment(payment_id)
             
@@ -1415,7 +1405,7 @@ def main():
             CommandHandler('start', start),
             CommandHandler('help', help_command),
             CallbackQueryHandler(button_buy_product, pattern='^buy_product$'),
-            CallbackQueryHandler(simulate_payment_callback, pattern='^pay_.*'),
+
         ],
         states={
             ASKING_PHONE: [
@@ -1480,6 +1470,7 @@ def main():
         
         # Запуск polling бота
         logger.info("📡 Запуск polling...")
+        await application.initialize()
         await application.updater.start_polling()
         await application.start()
         

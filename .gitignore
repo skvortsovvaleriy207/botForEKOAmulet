@@ -10,6 +10,8 @@ venv/
 pip-log.txt
 pip-delete-this-directory.txt
 
+test_address_validation.txt
+
 # Environment variables
 .env
 
