@@ -15,7 +15,7 @@ pip-delete-this-directory.txt
 
 # Logs
 *.log
-bot.log
+bot.log*
 
 # Project specific
 temp/
