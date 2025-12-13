@@ -113,6 +113,13 @@ log_handler = TimedRotatingFileHandler(
 )
 log_handler.suffix = "%d_%m_%y"  # Формат даты в имени файла при ротации
 
+class AccessLogFilter(logging.Filter):
+    """Фильтрует шумные ошибки aiohttp (например, HTTPS handshake на HTTP порт)"""
+    def filter(self, record):
+        if "BadStatusLine" in str(record.msg) or "Invalid method encountered" in str(record.msg):
+            return False
+        return True
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -121,6 +128,9 @@ logging.basicConfig(
         logging.StreamHandler()
     ]
 )
+
+# Применяем фильтр к aiohttp.server
+logging.getLogger("aiohttp.server").addFilter(AccessLogFilter())
 
 logger = logging.getLogger(__name__)
 
@@ -157,7 +167,30 @@ if SHEETS_AVAILABLE:
 STOCK_DATA = {'quantity': 10}
 ORDERS_DATA = {}
 WAITLIST_DATA = {}
-PENDING_PAYMENTS = {}  # ← Для отслеживания ожидающих платежей
+PENDING_PAYMENTS_FILE = "pending_payments.json"
+
+def load_pending_payments() -> dict:
+    """📂 Загрузка ожидающих платежей из файла"""
+    if os.path.exists(PENDING_PAYMENTS_FILE):
+        try:
+            with open(PENDING_PAYMENTS_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                logger.info(f"📂 Загружено {len(data)} ожидающих платежей")
+                return data
+        except Exception as e:
+            logger.error(f"❌ Ошибка загрузки pending_payments.json: {e}")
+            return {}
+    return {}
+
+def save_pending_payments():
+    """💾 Сохранение ожидающих платежей в файл"""
+    try:
+        with open(PENDING_PAYMENTS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(PENDING_PAYMENTS, f, ensure_ascii=False, indent=4)
+    except Exception as e:
+        logger.error(f"❌ Ошибка сохранения pending_payments.json: {e}")
+
+PENDING_PAYMENTS = load_pending_payments()  # ← Загружаем при старте
 
 # ============================================================================
 # ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ - ВАЛИДАЦИЯ
@@ -390,7 +423,10 @@ async def process_successful_payment(payment_id: str) -> bool:
         await send_admin_notification(admin_notification)
         
         # Удаляем из PENDING
-        del PENDING_PAYMENTS[payment_id]
+        if payment_id in PENDING_PAYMENTS:
+            del PENDING_PAYMENTS[payment_id]
+            save_pending_payments()  # 💾 СОХРАНЯЕМ
+
         logger.info(f"✅ Заказ {payment_id} обработан успешно!")
         return True
     else:
@@ -838,6 +874,7 @@ async def confirm_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
             'created_at': datetime.now().isoformat()
         }
         logger.info(f"📝 Заказ {payment_id} создан в ЮКассе и добавлен в PENDING_PAYMENTS")
+        save_pending_payments()  # 💾 СОХРАНЯЕМ
         
         # 3️⃣ ПЫТАЕМСЯ УМЕНЬШИТЬ ОСТАТОК ОДНОВРЕМЕННО С ДОБАВЛЕНИЕМ В ТАБЛИЦУ
         # ⚠️ ВАЖНО: Сначала уменьшаем остаток, потом записываем
@@ -847,6 +884,7 @@ async def confirm_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
             # ❌ ОСТАТОК УМЕНЬШИТЬ НЕ ПОЛУЧИЛОСЬ
             logger.error(f"❌ Не удалось уменьшить остаток для заказа {payment_id}")
             del PENDING_PAYMENTS[payment_id]
+            save_pending_payments()  # 💾 СОХРАНЯЕМ
             
             await query.edit_message_text(
                 text="❌ К сожалению, товар закончился в момент оформления. Попробуйте позже."
@@ -1243,9 +1281,11 @@ async def handle_yookassa_webhook(request):
         # Самый надежный способ - проверить статус платежа через API.
         
         # 3️⃣ ОБРАБАТЫВАЕМ ПЛАТЕЖ
-        payment_id = data.get('id')
-        status = data.get('status')
-        metadata = data.get('metadata', {})
+        # ЮKassa присылает данные внутри поля "object"
+        payment_object = data.get('object', {})
+        payment_id = payment_object.get('id')
+        status = payment_object.get('status')
+        metadata = payment_object.get('metadata', {})
         
         logger.info(f"📬 Webhook от ЮКассы: платеж {payment_id}, статус {status}")
         
@@ -1302,6 +1342,7 @@ async def handle_yookassa_webhook(request):
                 )
                 
                 del PENDING_PAYMENTS[payment_id]
+                save_pending_payments()  # 💾 СОХРАНЯЕМ
         
         return web.Response(status=200, text="OK")
     
