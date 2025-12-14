@@ -1519,9 +1519,10 @@ def main():
         # Настройка runner'а для aiohttp
         runner = web.AppRunner(app)
         await runner.setup()
-        site = web.TCPSite(runner, '0.0.0.0', 8080) # Порт 8080, можно вынести в .env
+        port = int(os.getenv('WEBHOOK_PORT', 8080))
+        site = web.TCPSite(runner, '0.0.0.0', port) # Порт вынесен в .env
         await site.start()
-        logger.info("🌍 Webhook server started on port 8080")
+        logger.info(f"🌍 Webhook server started on port {port}")
         
         # Запуск polling бота
         logger.info("📡 Запуск polling...")
