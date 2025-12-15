@@ -138,18 +138,19 @@ class GoogleSheetsHandler:
         try:
             worksheet = self.sheet.worksheet(self.SHEET_WAITLIST)
             
-            # Columns: Phone, Date
+            # Columns: Phone, User ID, Date
             row = [
                 phone,
+                user_id,
                 datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             ]
             
             # Find the next available row in Column A
             next_row = len(worksheet.col_values(1)) + 1
             
-            # Explicitly define the range A{row}:B{row}
-            # Columns: A, B (2 columns)
-            target_range = f"A{next_row}:B{next_row}"
+            # Explicitly define the range A{row}:C{row}
+            # Columns: A, B, C (3 columns)
+            target_range = f"A{next_row}:C{next_row}"
             
             logger.info(f"📝 Writing waitlist entry to {target_range}")
             
@@ -163,31 +164,45 @@ class GoogleSheetsHandler:
         """Get all users from 'Ожидание' sheet"""
         try:
             worksheet = self.sheet.worksheet(self.SHEET_WAITLIST)
-            all_values = worksheet.get_all_records()
-            
-            # Expected format from get_all_records is list of dicts with headers as keys
-            # We need to map it to what bot.py expects
-            # bot.py expects: {'phone': ..., 'user_id': ..., 'date': ...}
-            
-            # If headers are: Phone, User ID, Date
-            # keys will be 'Phone', 'User ID', 'Date'
-            
-            # Let's handle potential header case sensitivity or naming
-            # For robustness, let's just return what we get and let bot.py handle it?
-            # No, bot.py expects specific keys.
+            all_values = worksheet.get_all_values()
             
             result = []
-            for row in all_values:
-                # Try to find keys
-                phone = row.get('Phone') or row.get('phone') or row.get('Телефон')
-                uid = row.get('User ID') or row.get('user_id') or row.get('ID')
-                date = row.get('Date') or row.get('date') or row.get('Дата')
+            
+            # Check if first row is header
+            start_index = 0
+            if all_values and len(all_values) > 0:
+                first_row = all_values[0]
+                # Simple heuristic: check if first cell looks like a header "Phone" or "Телефон"
+                if str(first_row[0]).lower() in ['phone', 'телефон', 'номер']:
+                   start_index = 1
+
+            for i in range(start_index, len(all_values)):
+                row = all_values[i]
                 
-                if phone and uid:
+                # Ensure row has enough columns (at least Phone and User ID)
+                if len(row) < 2:
+                    continue
+                    
+                phone = str(row[0]).strip()
+                potential_uid = str(row[1]).strip()
+                
+                # Check if the second column is actually a User ID (digits)
+                # If it's a date (e.g. 2025-12-02), it won't be digits.
+                if potential_uid.isdigit():
+                    user_id = potential_uid
+                    date = str(row[2]).strip() if len(row) > 2 else ""
+                else:
+                    # Fallback for old format [Phone, Date] or invalid data
+                    # We cannot notify this user without an ID, so we skip
+                    # logger.warning(f"⚠️ Skipped row with invalid User ID: {row}")
+                    continue
+
+                if phone and user_id:
+                     # Clean up phone (optional)
                     result.append({
-                        'phone': str(phone),
-                        'user_id': str(uid),
-                        'date': str(date)
+                        'phone': phone,
+                        'user_id': user_id,
+                        'date': date
                     })
             
             return result
