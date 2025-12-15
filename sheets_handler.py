@@ -207,6 +207,18 @@ class GoogleSheetsHandler:
             
             return result
             
+            
         except Exception as e:
             logger.error(f"❌ Ошибка получения листа ожидания: {e}")
             return []
+
+    def clear_waitlist(self) -> bool:
+        """Clear all data from 'Ожидание' sheet"""
+        try:
+            worksheet = self.sheet.worksheet(self.SHEET_WAITLIST)
+            worksheet.clear()
+            logger.info("🧹 Лист ожидания успешно очищен")
+            return True
+        except Exception as e:
+            logger.error(f"❌ Ошибка очистки листа ожидания: {e}")
+            return False

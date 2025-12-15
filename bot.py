@@ -1301,6 +1301,16 @@ async def cmd_notify_waitlist(update: Update, context: ContextTypes.DEFAULT_TYPE
         f"💾 Обновлено в Google Sheets ✅"
     )
     
+    # ✅ ОЧИСТКА ЛИСТА ОЖИДАНИЯ (GOOGLE SHEETS)
+    if SHEETS_AVAILABLE and sheets:
+         try:
+            # Run in thread to avoid blocking loop
+            await asyncio.to_thread(sheets.clear_waitlist) 
+            admin_channel_msg += "\n🗑️ Лист ожидания в таблице очищен"
+         except Exception as e:
+            logger.error(f"❌ Не удалось очистить таблицу: {e}")
+            admin_channel_msg += f"\n⚠️ Не удалось очистить таблицу: {e}"
+
     await send_admin_notification(admin_channel_msg)
 
     WAITLIST_DATA.clear()
