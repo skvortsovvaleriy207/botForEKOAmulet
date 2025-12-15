@@ -138,7 +138,7 @@ logger = logging.getLogger(__name__)
 # КОНСТАНТЫ
 # ============================================================================
 
-ASKING_PHONE, ASKING_FIO, ASKING_ADDRESS, ASKING_CONFIRMATION, ASKING_PHONE_WAITLIST = range(5)
+ASKING_PHONE, ASKING_FIO, ASKING_ADDRESS, SHOWING_REVIEWS, ASKING_CONFIRMATION, ASKING_PHONE_WAITLIST = range(6)
 
 # Retry параметры
 MAX_RETRIES = 3
@@ -615,6 +615,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"🌿 Прочный инструмент для тех, кто ценит и вещи, и природу.\n\n"
         f"🛍 **Товар:** ЭКОамулет — {PRODUCT_PRICE} ₽\n"
         f"📦 **Осталось:** {stock_quantity} шт.\n\n"
+        f"🌟 До Нового года — бесплатная доставка по РФ!\n"
+        f"> 🔥 Осталось всего 250 стартовых комплектов.\n\n"
         f"👇 Нажми кнопку ниже, чтобы оформить заказ:"
     )
 
@@ -814,6 +816,31 @@ async def ask_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['address'] = address
     logger.info(f"✅ Адрес получен: {address}")
     
+    
+    # ✅ ПОКАЗЫВАЕМ ОТЗЫВЫ (SOCIAL PROOF)
+    reviews_text = (
+        f"Что говорят те, кто уже купил:\n\n"
+        f"«Залатал трубу на даче, держит второй сезон. Спасение!» — Иван, сантехник.\n\n"
+        f"«Ребёнок сломал джойстик, слепил новую кнопку за 5 минут. Теперь он фанат!» — Алексей, папа.\n\n"
+        f"«Беру в походы. Починил палатку, кружку и даже обувь. Незаменимая вещь.» — Михаил, турист.\n\n"
+        f"Больше отзывов в нашем канале: @ECOamulet\n\n"
+        f"Готовы оформить заказ?"
+    )
+
+    keyboard = [[
+        InlineKeyboardButton("✅ ОФОРМИТЬ ЗАКАЗ", callback_data='proceed_to_confirm')
+    ]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await update.message.reply_text(reviews_text, reply_markup=reply_markup)
+    
+    return SHOWING_REVIEWS
+
+async def show_order_confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """✅ Показ итогового подтверждения заказа (после отзывов)"""
+    query = update.callback_query
+    await query.answer()
+    
     fio = context.user_data.get('fio')
     address = context.user_data.get('address')
     phone = context.user_data.get('phone')
@@ -833,7 +860,11 @@ async def ask_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await update.message.reply_text(confirm_text, reply_markup=reply_markup)
+    # Отправляем новым сообщением или редактируем старое
+    try:
+        await query.edit_message_text(confirm_text, reply_markup=reply_markup)
+    except Exception:
+        await query.message.reply_text(confirm_text, reply_markup=reply_markup)
     
     return ASKING_CONFIRMATION
 
@@ -879,6 +910,25 @@ async def confirm_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # 3️⃣ ПЫТАЕМСЯ УМЕНЬШИТЬ ОСТАТОК ОДНОВРЕМЕННО С ДОБАВЛЕНИЕМ В ТАБЛИЦУ
         # ⚠️ ВАЖНО: Сначала уменьшаем остаток, потом записываем
         new_stock = await decrease_stock_safe()
+
+        if new_stock is not None:
+             # 🚨 ПРОВЕРКА НА КРИТИЧЕСКИЙ ОСТАТОК (ALERT)
+            if new_stock <= CRITICAL_STOCK_THRESHOLD:
+                await send_admin_notification(
+                    f"🚨 *КРИТИЧЕСКИЙ УРОВЕНЬ ОСТАТКА!*\n\n"
+                    f"🛍️ Товар: {PRODUCT_NAME}\n"
+                    f"📉 Остаток: {new_stock} шт.\n"
+                    f"⚠️ Пороговое значение: {CRITICAL_STOCK_THRESHOLD}\n\n"
+                    f"⚡ ДЕЙСТВИЕ: Нужно срочно пополнить запас!"
+                )
+            elif new_stock <= LOW_STOCK_THRESHOLD:
+                await send_admin_notification(
+                    f"⚠️ *НИЗКИЙ ОСТАТОК!*\n\n"
+                    f"🛍️ Товар: {PRODUCT_NAME}\n"
+                    f"📉 Остаток: {new_stock} шт.\n"
+                    f"⚠️ Пороговое значение: {LOW_STOCK_THRESHOLD}\n\n"
+                    f"💡 Совет: Подумай о пополнении запаса"
+                )
         
         if new_stock is None:
             # ❌ ОСТАТОК УМЕНЬШИТЬ НЕ ПОЛУЧИЛОСЬ
@@ -1465,6 +1515,9 @@ def main():
         states={
             ASKING_PHONE: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, ask_phone),
+            ],
+            SHOWING_REVIEWS: [
+                CallbackQueryHandler(show_order_confirmation, pattern='^proceed_to_confirm$'),
             ],
             ASKING_FIO: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, ask_fio),
