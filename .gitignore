@@ -27,3 +27,7 @@ creds.json
 .idea/
 .vscode/
 .DS_Store
+
+# Test files
+scripts/
+tests/

@@ -54,24 +54,120 @@ class GoogleSheetsHandler:
             logger.error(f"❌ Ошибка подключения к Google Sheets: {e}")
             raise e
 
-    def get_stock(self) -> int:
-        """Get current stock quantity from 'Остатки' sheet (Cell B2)"""
+    def get_products_raw(self) -> List[Dict]:
+        """
+        Internal: Get all products from 'Остатки' sheet with row numbers.
+        Returns list of dicts: [{'id': '...', 'name': '...', 'price': ..., 'stock': ..., 'row': ...}, ...]
+        """
         try:
             worksheet = self.sheet.worksheet(self.SHEET_STOCK)
-            # Assuming stock is in cell B2
-            val = worksheet.acell('B2').value
-            return int(val) if val else 0
+            all_values = worksheet.get_all_values()
+            
+            products = []
+            
+            # Skip header if present (heuristic: checks if first row has "product_id" or "id")
+            start_index = 0
+            if all_values and len(all_values) > 0:
+                first_cell = str(all_values[0][0]).lower().strip()
+                if 'id' in first_cell or 'product' in first_cell:
+                    start_index = 1
+
+            for i in range(start_index, len(all_values)):
+                row_data = all_values[i]
+                # Expecting at least 4 columns: ID, Name, Price, Stock
+                if len(row_data) < 4:
+                    continue
+                
+                p_id = str(row_data[0]).strip()
+                if not p_id: 
+                    continue
+                    
+                try:
+                    price = int(str(row_data[2]).replace(' ', '').replace(',', '').split('.')[0])
+                except:
+                    price = 0
+                    
+                try:
+                    stock = int(str(row_data[3]).replace(' ', '').split('.')[0])
+                except:
+                    stock = 0
+
+                products.append({
+                    'id': p_id,
+                    'name': str(row_data[1]).strip(),
+                    'price': price,
+                    'stock': stock,
+                    'row': i + 1  # 1-based index for gspread usage
+                })
+                
+            return products
+        except Exception as e:
+            logger.error(f"❌ Error reading products: {e}")
+            return []
+
+    def get_products(self) -> Dict[str, Dict]:
+        """
+        Public: Get products as a dictionary keyed by product_id.
+        Ex: {'amulet': {'name': '...', 'price': 1900, 'stock': 100}, ...}
+        """
+        raw = self.get_products_raw()
+        result = {}
+        for p in raw:
+            # removing 'id' and 'row' from the value dict to match user spec examples strictly,
+            # or keeping them? User example: "amulet": {"name": "...", "price": 1900, "stock": 100}
+            result[p['id']] = {
+                'name': p['name'],
+                'price': p['price'],
+                'stock': p['stock']
+            }
+        return result
+
+    def get_stock(self) -> int:
+        """
+        Get stock for the main product 'amulet'.
+        Backward compatibility for existing code.
+        """
+        try:
+            products = self.get_products()
+            # Default ID is 'amulet' as per plan
+            item = products.get('amulet')
+            if item:
+                return item['stock']
+            
+            # Fallback/Empty check
+            logger.warning("⚠️ Main product 'amulet' not found in stock sheet.")
+            return 0
         except Exception as e:
             logger.error(f"❌ Ошибка получения остатка: {e}")
-            # Re-raise or return 0? bot.py handles exceptions, so re-raise to trigger retry/local fallback
             raise e
 
     def set_stock(self, quantity: int) -> bool:
-        """Set stock quantity in 'Остатки' sheet (Cell B2)"""
+        """
+        Set stock quantity for main product 'amulet'.
+        Backward compatibility.
+        """
         try:
-            worksheet = self.sheet.worksheet(self.SHEET_STOCK)
-            worksheet.update('B2', quantity)
-            return True
+            # We need the row number. Re-read raw products to find it.
+            # This is slightly inefficient (read all to write one), but safe and simple.
+            # Optimization: could use worksheet.find('amulet', in_column=1) if available,
+            # but getting all values is robust against structure variations if we use the same parsing logic.
+            
+            vals = self.get_products_raw()
+            target_row = None
+            for p in vals:
+                if p['id'] == 'amulet':
+                    target_row = p['row']
+                    break
+            
+            if target_row:
+                worksheet = self.sheet.worksheet(self.SHEET_STOCK)
+                # Stock is column D (4)
+                worksheet.update_cell(target_row, 4, quantity)
+                return True
+            else:
+                logger.error("❌ Cannot update stock: Product 'amulet' not found.")
+                return False
+
         except Exception as e:
             logger.error(f"❌ Ошибка обновления остатка: {e}")
             return False
