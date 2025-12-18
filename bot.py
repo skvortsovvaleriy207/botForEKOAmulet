@@ -1477,6 +1477,23 @@ async def cmd_notify_waitlist(update: Update, context: ContextTypes.DEFAULT_TYPE
         f"Статус обновлен в Google Sheets"
     )
 
+async def cmd_help_project(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """🫂 Команда /help_project - раздел помощи"""
+    user = update.effective_user
+    logger.info(f"🫂 Пользователь {user.id} вызвал /help_project")
+    
+    text = (
+        "**Помочь проекту**\n\n"
+        "Выберите, как хотите поддержать миссию ЭКОамулета. "
+        "Каждый ваш шаг делает мир чуть более творческим, осознанным и доступным."
+    )
+    
+    await update.message.reply_text(
+        text=text,
+        reply_markup=get_help_project_keyboard(),
+        parse_mode="Markdown"
+    )
+
 # ============================================================================
 # WEBHOOK HANDLER ДЛЯ ЮКАССЫ
 # ============================================================================
@@ -1851,7 +1868,8 @@ def main():
             CommandHandler('start', start),
             CommandHandler('help', help_command),
             CallbackQueryHandler(button_buy_product, pattern='^buy_product$'),
-
+            CallbackQueryHandler(btn_cert_kid, pattern='^cert_kid$'),
+            CallbackQueryHandler(btn_cert_special, pattern='^cert_special$'),
         ],
         states={
             ASKING_PHONE: [
@@ -1889,11 +1907,11 @@ def main():
     application.add_handler(CommandHandler('setstock', cmd_setstock))
     application.add_handler(CommandHandler('stock', cmd_stock))
     application.add_handler(CommandHandler('notify_waitlist', cmd_notify_waitlist))
+    application.add_handler(CommandHandler('help_project', cmd_help_project))
     
     # 1.5️⃣ НОВЫЕ HANDLERS (Помочь проекту) - ставим ПЕРЕД ConversationHandler
     application.add_handler(CallbackQueryHandler(btn_help_project_main, pattern='^help_project$'))
-    application.add_handler(CallbackQueryHandler(btn_cert_kid, pattern='^cert_kid$'))
-    application.add_handler(CallbackQueryHandler(btn_cert_special, pattern='^cert_special$'))
+    # Removed cert handlers from here, moved to ConversationHandler entry_points
     application.add_handler(CallbackQueryHandler(btn_offer_help, pattern='^offer_help$'))
     application.add_handler(CallbackQueryHandler(btn_take_task, pattern='^take_task$'))
     application.add_handler(CallbackQueryHandler(btn_share_project, pattern='^share_project$'))
