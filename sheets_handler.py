@@ -55,16 +55,30 @@ class GoogleSheetsHandler:
             raise e
 
     def get_stock(self) -> int:
-        """Get current stock quantity from 'Остатки' sheet (Cell B2)"""
-        try:
-            worksheet = self.sheet.worksheet(self.SHEET_STOCK)
-            # Assuming stock is in cell B2
-            val = worksheet.acell('B2').value
-            return int(val) if val else 0
-        except Exception as e:
-            logger.error(f"❌ Ошибка получения остатка: {e}")
-            # Re-raise or return 0? bot.py handles exceptions, so re-raise to trigger retry/local fallback
-            raise e
+        """Get current stock quantity from 'Остатки' sheet (Cell B2) with retry logic"""
+        retries = 3
+        for attempt in range(retries):
+            try:
+                # Refresh client if it seems disconnected (simple check)
+                if not self.client:
+                    self._connect()
+                
+                worksheet = self.sheet.worksheet(self.SHEET_STOCK)
+                val = worksheet.acell('B2').value
+                return int(val) if val else 0
+            except Exception as e:
+                logger.warning(f"⚠️ Ошибка получения остатка (попытка {attempt+1}/{retries}): {e}")
+                if attempt < retries - 1:
+                    # Try to reconnect on failure
+                    try:
+                        logger.info("🔄 Переподключение к Google Sheets...")
+                        self._connect()
+                    except:
+                        pass
+                else:
+                    logger.error(f"❌ Не удалось получить остаток после {retries} попыток")
+                    # Пробрасываем ошибку, чтобы bot.py мог переключиться на локальное хранилище
+                    raise e
 
     def set_stock(self, quantity: int) -> bool:
         """Set stock quantity in 'Остатки' sheet (Cell B2)"""
@@ -77,12 +91,12 @@ class GoogleSheetsHandler:
             return False
 
     def add_order(self, payment_id: str, user_id: int, fio: str, 
-                 address: str, phone: str, product: str, price: int, status: str, ref_code: str = None) -> bool:
+                 address: str, phone: str, product: str, price: int, status: str, email: str = "", ref_code: str = None) -> bool:
         """Add new order to 'Заказы' sheet"""
         try:
             worksheet = self.sheet.worksheet(self.SHEET_ORDERS)
             
-            # Columns: Payment ID, FIO, Address, Phone, Product, Price, Status, Date
+            # Columns: Payment ID, FIO, Address, Phone, Product, Price, Status, Date, Email
             row = [
                 payment_id,
                 fio,
@@ -91,16 +105,17 @@ class GoogleSheetsHandler:
                 product,
                 price,
                 status,
-                datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                email
             ]
             
             # Find the next available row in Column A
             # col_values(1) returns all values in the first column
             next_row = len(worksheet.col_values(1)) + 1
             
-            # Explicitly define the range A{row}:H{row} to force correct placement
-            # Columns: A, B, C, D, E, F, G, H (8 columns)
-            target_range = f"A{next_row}:H{next_row}"
+            # Explicitly define the range A{row}:I{row} to force correct placement
+            # Columns: A, B, C, D, E, F, G, H, I (9 columns)
+            target_range = f"A{next_row}:I{next_row}"
             
             logger.info(f"📝 Writing order to {target_range}")
             
