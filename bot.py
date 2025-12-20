@@ -77,6 +77,17 @@ PRODUCT_PRICE = int(os.getenv('PRODUCT_PRICE', 1000))
 PRODUCT_PARAM = os.getenv('PRODUCT_PARAM', 'ECO_AMULET')
 LOW_STOCK_THRESHOLD = int(os.getenv('LOW_STOCK_THRESHOLD', 5))
 CRITICAL_STOCK_THRESHOLD = int(os.getenv('CRITICAL_STOCK_THRESHOLD', 3))
+
+PRODUCT_NAME_CERT_DIGITAL = os.getenv('PRODUCT_NAME_CERT_DIGITAL', "Цифровой сертификат Эко-урок")
+PRODUCT_PRICE_CERT_DIGITAL = int(os.getenv('PRODUCT_PRICE_CERT_DIGITAL', 1000))
+PRODUCT_NAME_CERT_BOX = os.getenv('PRODUCT_NAME_CERT_BOX', "Подарочный набор Эко-урок")
+PRODUCT_PRICE_CERT_BOX = int(os.getenv('PRODUCT_PRICE_CERT_BOX', 1500))
+
+PRODUCT_NAME_CERT_SPECIAL_DIGITAL = os.getenv('PRODUCT_NAME_CERT_SPECIAL_DIGITAL', "Взнос: Творческая программа")
+PRODUCT_PRICE_CERT_SPECIAL_DIGITAL = int(os.getenv('PRODUCT_PRICE_CERT_SPECIAL_DIGITAL', 1000))
+PRODUCT_NAME_CERT_SPECIAL_BOX = os.getenv('PRODUCT_NAME_CERT_SPECIAL_BOX', "Набор: История возможности")
+PRODUCT_PRICE_CERT_SPECIAL_BOX = int(os.getenv('PRODUCT_PRICE_CERT_SPECIAL_BOX', 1500))
+
 YOOKASSA_API_KEY = os.getenv('YOOKASSA_API_KEY')
 YOOKASSA_SHOP_ID = os.getenv('YOOKASSA_SHOP_ID')
 GOOGLE_SHEET_ID = os.getenv('GOOGLE_SHEET_ID')
@@ -292,33 +303,6 @@ async def send_special_certificate_thanks(user_id: int, email: str) -> bool:
     
     return await send_user_notification(user_id, text)
 
-async def notify_admin_certificate(order_data: dict, payment_id: str):
-    """✅ Отправить специальное уведомление администратору о сертификате"""
-    product_id = order_data.get('product_id')
-    if product_id not in ['kid', 'special']:
-        return
-
-    # Определяем тип сертификата
-    cert_type = "Сертификат: Эко-урок для ребёнка" if product_id == 'kid' else "Сертификат: Инклюзивное творчество"
-    
-    text = (
-        f"🎁 **НОВЫЙ СЕРТИФИКАТ!**\n\n"
-        f"📌 Тип: {cert_type}\n"
-        f"💰 Сумма: {order_data.get('product_price')} ₽\n"
-        f"👤 Покупатель: ID {order_data.get('user_id')}\n"
-        f"☎️ Телефон: {order_data.get('phone')}\n"
-        f"🆔 Заказ ID: {payment_id}\n"
-    )
-    
-    try:
-        await application.bot.send_message(
-            chat_id=ADMIN_CHAT_ID,
-            text=text,
-            parse_mode="Markdown"
-        )
-        logger.info(f"✅ Уведомление о сертификате отправлено админу ({ADMIN_CHAT_ID})")
-    except Exception as e:
-        logger.error(f"❌ Ошибка уведомления админа о сертификате: {e}")
 
 # ============================================================================
 # ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ - ОПЕРАЦИИ С ОСТАТКОМ (THREAD-SAFE!)
@@ -382,13 +366,8 @@ def create_yookassa_payment(amount: int, description: str, metadata: dict) -> tu
 
 def get_payment_details(product_id: str, product_name: str, phone: str) -> str:
     """📝 Генерация описания платежа в зависимости от товара"""
-    if product_id == 'kid':
-        return "Сертификат: Эко-урок для ребёнка. Подарок для эко-мышления."
-    elif product_id == 'special':
-        return "Сертификат: Инклюзивное творчество. Поддержка особых мастеров."
-    else:
-        # Default / Amulet
-        return f"Заказ {product_name} для {phone}"
+    # Default / Amulet
+    return f"Заказ {product_name} для {phone}"
 
 async def get_stock() -> int:
     """✅ Получить текущий остаток (БЕЗОПАСНО для параллельного доступа)"""
@@ -763,17 +742,14 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if is_admin:
         help_text = (
             f"🛒 КОМАНДЫ ПОЛЬЗОВАТЕЛЯ:\n"
-            f"/start — 🏠 Главное меню и карточка товара\n"
+            f"/start — 🏠 Главное меню и покупка\n"
+            f"/help_project — 🤝 Помочь проекту (Подарить/Навык)\n"
             f"/help — ❓ Эта справка\n\n"
             f"👨‍💼 АДМИНСКИЕ КОМАНДЫ:\n"
             f"/setstock <количество> — 📊 Установить остаток\n"
             f"  Пример: /setstock 50\n\n"
             f"/stock — 📦 Проверить текущий остаток\n\n"
-            f"/notify_waitlist — 📢 Отправить рассылку листу ожидания\n\n"
-            f"📝 Примеры:\n"
-            f"• /setstock 100 — установит остаток на 100 шт\n"
-            f"• /stock — покажет текущий остаток\n"
-            f"• /notify_waitlist — отправит уведомления ожидающим\n\n"
+            f"/notify_waitlist — 📢 Рассылка листу ожидания\n\n"
             f"⚠️ Все действия администратора логируются\n"
             f"💾 Все данные сохраняются в Google Sheets"
         )
@@ -783,16 +759,14 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         help_text = (
             f"📚 Доступные команды:\n\n"
-            f"/start — 🏠 Главное меню и информация о товаре\n"
+            f"/start — 🏠 Главное меню и покупка амулета\n"
+            f"/help_project — 🤝 Помочь проекту (Подарить амулет / Навык)\n"
             f"/help — ❓ Эта справка\n\n"
-            f"🛍️ Как оформить заказ:\n"
-            f"1️⃣ Нажми /start\n"
-            f"2️⃣ Нажми кнопку \"🛒 Оформить заказ\"\n"
-            f"3️⃣ Заполни форму (телефон, ФИО, адрес)\n"
-            f"4️⃣ Проверь данные и подтверди заказ\n"
-            f"5️⃣ Перейди по ссылке для оплаты\n\n"
-            f"✅ После оплаты тебе придет подтверждение и чек!\n\n"
-            f"❓ Если товара нет в наличии, ты сможешь встать в очередь ожидания"
+            f"🛍️ Что здесь можно сделать:\n"
+            f"1️⃣ Купить ЭКОамулет для себя (/start)\n"
+            f"2️⃣ Подарить амулет ребёнку или особенному человеку (/help_project)\n"
+            f"3️⃣ Стать волонтером или помочь навыком (/help_project)\n\n"
+            f"❓ Есть вопросы? Пишите нам @skvortsovvaleriy"
         )
         
         await update.message.reply_text(help_text)
@@ -809,8 +783,6 @@ async def start_order_flow(user, query, context, product_id: str):
     
     # Цены hardcoded для простоты, или можно расширить get_products
     price = PRODUCT_PRICE
-    if product_id in ['kid', 'special']:
-        price = 1000 # Цена сертификатов
     
     # 2. Проверка наличия
     # Сертификаты виртуальные, их наличие можно считать бесконечным или проверять отдельно
@@ -836,18 +808,7 @@ async def start_order_flow(user, query, context, product_id: str):
             await query.edit_message_text(
                 text="Отлично! Для оформления заказа мне нужны ваши данные."
             )
-        elif product_id == 'kid':
-             await query.edit_message_text(
-                text=f"🎁 Оформляем сертификат «Эко-урок для ребёнка» за {price} ₽.\n"
-                     f"Пожалуйста, отправьте ФИО, на кого оформить сертификат."
-            )
-        elif product_id == 'special':
-             await query.edit_message_text(
-                text=f"🎁 Оформляем сертификат «Инклюзивное творчество» за {price} ₽.\n"
-                     f"Пожалуйста, отправьте ФИО, на кого оформить сертификат."
-            )
-        
-        await asyncio.sleep(0.5)
+
         
         # Запрашиваем телефон (стандартный первый шаг)
         await query.message.reply_text(
@@ -1006,22 +967,22 @@ async def ask_phone_gift(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ]
         text_options = (
             "💳 Выберите вариант участия:\n\n"
-            "🤝 *Стать частью программы* (1000₽)\n"
+            f"🤝 *Стать частью программы* ({PRODUCT_PRICE_CERT_SPECIAL_DIGITAL}₽)\n"
             "— Цифровой сертификат + особый отчёт\n\n"
-            "🎁 *Подарок с историей* (1500₽)\n"
+            f"🎁 *Подарок с историей* ({PRODUCT_PRICE_CERT_SPECIAL_BOX}₽)\n"
             "— Цифровой сертификат + физическая тактильная открытка с историей благополучателя, доставляется вам (цена + доставка)."
         )
     else:
         # Kid flow
         keyboard = [
-            [InlineKeyboardButton("🎁 Цифровой сертификат (1000₽)", callback_data='cert_digital')],
-            [InlineKeyboardButton("📦 Подарочный набор (1500₽)", callback_data='cert_box')]
+            [InlineKeyboardButton(f"🎁 Цифровой сертификат ({PRODUCT_PRICE_CERT_DIGITAL}₽)", callback_data='cert_digital')],
+            [InlineKeyboardButton(f"📦 Подарочный набор ({PRODUCT_PRICE_CERT_BOX}₽)", callback_data='cert_box')]
         ]
         text_options = (
             "💳 Выберите вариант сертификата:\n\n"
-            "🎁 *Цифровой сертификат* (1000₽)\n"
+            f"🎁 *Цифровой сертификат* ({PRODUCT_PRICE_CERT_DIGITAL}₽)\n"
             "— Красивый PDF, отправляется на email\n\n"
-            "📦 *Подарочный набор* (1500₽)\n"
+            f"📦 *Подарочный набор* ({PRODUCT_PRICE_CERT_BOX}₽)\n"
             "— Цифровой сертификат + его распечатанный версия в конверте с наклейкой ЭкоГаджета, доставляется вам или напрямую ребёнку, если известен адрес (цена + доставка)."
         )
 
@@ -1042,31 +1003,31 @@ async def choose_cert_type(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     if choice == 'cert_digital':
         context.user_data['product_id'] = 'cert_digital'
-        context.user_data['product_price'] = 1000
-        context.user_data['product_name'] = "Цифровой сертификат Эко-урок"
+        context.user_data['product_price'] = PRODUCT_PRICE_CERT_DIGITAL
+        context.user_data['product_name'] = PRODUCT_NAME_CERT_DIGITAL
         # Skip address
         context.user_data['address'] = "Электронная доставка"
         return await show_confirmation_gift(query, context)
         
     elif choice == 'cert_box':
         context.user_data['product_id'] = 'cert_box'
-        context.user_data['product_price'] = 1500
-        context.user_data['product_name'] = "Подарочный набор Эко-урок"
+        context.user_data['product_price'] = PRODUCT_PRICE_CERT_BOX
+        context.user_data['product_name'] = PRODUCT_NAME_CERT_BOX
         
         await query.edit_message_text("📍 Введите адрес доставки (с индексом):")
         return ASKING_ADDRESS_GIFT
 
     elif choice == 'cert_special_digital':
         context.user_data['product_id'] = 'cert_special_digital'
-        context.user_data['product_price'] = 1000
-        context.user_data['product_name'] = "Взнос: Творческая программа"
+        context.user_data['product_price'] = PRODUCT_PRICE_CERT_SPECIAL_DIGITAL
+        context.user_data['product_name'] = PRODUCT_NAME_CERT_SPECIAL_DIGITAL
         context.user_data['address'] = "Электронная доставка"
         return await show_confirmation_gift(query, context)
 
     elif choice == 'cert_special_box':
         context.user_data['product_id'] = 'cert_special_box'
-        context.user_data['product_price'] = 1500
-        context.user_data['product_name'] = "Набор: История возможности"
+        context.user_data['product_price'] = PRODUCT_PRICE_CERT_SPECIAL_BOX
+        context.user_data['product_name'] = PRODUCT_NAME_CERT_SPECIAL_BOX
         
         await query.edit_message_text("📍 Введите адрес доставки (с индексом):")
         return ASKING_ADDRESS_GIFT
@@ -1260,11 +1221,9 @@ async def show_order_confirmation(update: Update, context: ContextTypes.DEFAULT_
     product_price = context.user_data.get('product_price', PRODUCT_PRICE)
     
     # Название товара
-    product_title = PRODUCT_NAME
-    if product_id == 'kid':
-        product_title = "Сертификат: Эко-урок"
-    elif product_id == 'special':
-        product_title = "Сертификат: Инклюзивное творчество"
+    # Название товара
+    product_title = context.user_data.get('product_name', PRODUCT_NAME)
+
     
     confirm_text = (
         f"✅ Ваш заказ:\n\n"
@@ -1310,14 +1269,11 @@ async def confirm_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     product_title = context.user_data.get('product_name', PRODUCT_NAME)
     
     # Fallback logic if product_name wasn't set or needs override
-    if product_id == 'kid':
-        product_title = "Сертификат: Эко-урок для ребёнка"
-    elif product_id == 'special':
-        product_title = "Сертификат: Инклюзивное творчество"
-    elif product_id == 'cert_digital':
-        product_title = "Цифровой сертификат: Эко-урок"
+    # Fallback logic if product_name wasn't set or needs override
+    if product_id == 'cert_digital':
+        product_title = PRODUCT_NAME_CERT_DIGITAL
     elif product_id == 'cert_box':
-        product_title = "Подарочный набор: Эко-урок"
+        product_title = PRODUCT_NAME_CERT_BOX
 
     try:
         # 1️⃣ СОЗДАЕМ ПЛАТЕЖ В ЮКАССЕ
@@ -1611,17 +1567,13 @@ async def cmd_help_project(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def btn_cert_kid(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """🎒 Покупка: Сертификат для ребенка"""
-    query = update.callback_query
-    user = query.from_user
-    await query.answer()
-    return await start_order_flow(user, query, context, product_id='kid')
+    # Redirect to improved gift flow
+    return await start_gift_flow(update, context)
 
 async def btn_cert_special(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """💎 Покупка: Сертификат для особенного человека"""
-    query = update.callback_query
-    user = query.from_user
-    await query.answer()
-    return await start_order_flow(user, query, context, product_id='special')
+    # Redirect to improved gift flow
+    return await start_gift_flow(update, context)
 
 async def btn_offer_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """🤝 Заглушка: Предложить помощь"""
