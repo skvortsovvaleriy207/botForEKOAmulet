@@ -38,6 +38,7 @@ from typing import Optional
 from functools import wraps
 from yookassa import Configuration, Payment
 import uuid
+from urllib.parse import urlparse
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, BotCommand, BotCommandScopeChat, BotCommandScopeDefault
 from telegram.request import HTTPXRequest
@@ -2212,11 +2213,28 @@ def main():
     # 4️⃣ Error handler
     application.add_error_handler(error_handler)
 
-    # ✅ ЗАПУСК ВЕБ-СЕРВЕРА И БОТА
     # Настраиваем веб-сервер для webhook'ов
     app = web.Application()
+    
+    # 1️⃣ Standard Production Route
     app.router.add_post('/webhook', handle_yookassa_webhook)
     
+    # 2️⃣ Custom Route (from WEBHOOK_URL)
+    webhook_url = os.getenv('WEBHOOK_URL', '')
+    custom_path = None
+    
+    if webhook_url:
+        try:
+            parsed = urlparse(webhook_url)
+            candidate_path = parsed.path
+            # Add only if it's a valid path and structurally different from default
+            if candidate_path and candidate_path != '/' and candidate_path != '/webhook':
+                custom_path = candidate_path
+                app.router.add_post(custom_path, handle_yookassa_webhook)
+                logger.info(f"🔗 Added additional webhook route: {custom_path}")
+        except Exception as e:
+            logger.error(f"❌ Error parsing WEBHOOK_URL: {e}")
+
     # Запускаем все вместе
     async def run_app_and_bot():
         # Настройка runner'а для aiohttp
@@ -2225,7 +2243,11 @@ def main():
         port = int(os.getenv('WEBHOOK_PORT', 8080))
         site = web.TCPSite(runner, '0.0.0.0', port) # Порт вынесен в .env
         await site.start()
-        logger.info(f"🌍 Webhook server started on port {port}")
+        
+        log_msg = f"🌍 Webhook server started on port {port}. Routes: /webhook"
+        if custom_path:
+            log_msg += f", {custom_path}"
+        logger.info(log_msg)
         
         # Запуск polling бота
         logger.info("📡 Запуск polling...")
