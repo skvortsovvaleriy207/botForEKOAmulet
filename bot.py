@@ -707,6 +707,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # 🔗 ПОДДЕРЖКА DEEPLINK ПАРАМЕТРОВ
     if context.args:
         logger.info(f"🔗 DeepLink параметр получен: {context.args}")
+        if context.args[0] == "help_project":
+             logger.info(f"↪️ Перенаправление на /help_project")
+             await cmd_help_project(update, context)
+             return ConversationHandler.END
 
     # Получаем актуальный остаток
     stock_quantity = await get_stock()
