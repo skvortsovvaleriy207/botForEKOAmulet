@@ -795,8 +795,12 @@ async def start_order_flow(user, query, context, product_id: str):
     # В ТЗ не сказано, что сертификаты тратят сток амулетов.
     # ПРЕДПОЛОЖЕНИЕ: Сертификаты безлимитные.
     
+    # ✅ ТЕПЕРЬ СЕРТИФИКАТЫ ТОЖЕ ТРАТЯТ ЗАПАС (т.к. нужно делать амулет)
+    # Проверяем наличие для всех товаров, связанных с амулетами
+    NEEDS_AMULET_STOCK = ['amulet', 'kid', 'special', 'cert_digital', 'cert_box', 'cert_special_digital', 'cert_special_box']
+    
     is_available = True
-    if product_id == 'amulet':
+    if product_id in NEEDS_AMULET_STOCK:
         if stock <= 0:
             is_available = False
             
@@ -1314,8 +1318,11 @@ async def confirm_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.info(f"📝 Заказ {payment_id} ({product_id}) создан в ЮКассе")
         save_pending_payments()  # 💾 СОХРАНЯЕМ
         
-        # 3️⃣ УПРАВЛЕНИЕ ОСТАТКАМИ (Только для физических товаров)
-        if product_id == 'amulet':
+        # 3️⃣ УПРАВЛЕНИЕ ОСТАТКАМИ (Только для физических товаров и СЕРТИФИКАТОВ)
+        # Сертификат = изготовление амулета => списываем остаток
+        NEEDS_AMULET_STOCK = ['amulet', 'kid', 'special', 'cert_digital', 'cert_box', 'cert_special_digital', 'cert_special_box']
+        
+        if product_id in NEEDS_AMULET_STOCK:
             # ⚠️ ВАЖНО: Сначала уменьшаем остаток, потом записываем
             new_stock = await decrease_stock_safe()
 
@@ -1360,8 +1367,8 @@ async def confirm_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
             # ❌ НЕ УДАЛОСЬ ДОБАВИТЬ ЗАКАЗ
             logger.error(f"❌ Не удалось добавить заказ {payment_id} в Google Sheets после 3 попыток!")
             
-            # ↩️ ОТКАТЫВАЕМ: ВОССТАНАВЛИВАЕМ ОСТАТОК (Только для амулетов)
-            if product_id == 'amulet':
+            # ↩️ ОТКАТЫВАЕМ: ВОССТАНАВЛИВАЕМ ОСТАТОК
+            if product_id in NEEDS_AMULET_STOCK:
                 await increase_stock_safe(1)
                 logger.warning(f"⏮️ Остаток восстановлен для заказа {payment_id}")
             
@@ -1974,8 +1981,12 @@ async def handle_yookassa_webhook(request):
                 phone = order_data['phone']
                 
                 # ↩️ ОТКАТЫВАЕМ: ВОЗВРАЩАЕМ ОСТАТОК
-                await increase_stock_safe(1)
-                logger.warning(f"⏮️ Остаток восстановлен для заказа {payment_id}")
+                # Проверяем, списывали ли мы остаток для этого товара
+                NEEDS_AMULET_STOCK = ['amulet', 'kid', 'special', 'cert_digital', 'cert_box', 'cert_special_digital', 'cert_special_box']
+                
+                if order_data.get('product_id') in NEEDS_AMULET_STOCK:
+                    await increase_stock_safe(1)
+                    logger.warning(f"⏮️ Остаток восстановлен для заказа {payment_id}")
                 
                 # Обновляем статус
                 await update_order_status_with_retry(payment_id, "Отменено")
