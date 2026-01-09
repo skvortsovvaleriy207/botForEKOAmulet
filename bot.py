@@ -946,7 +946,7 @@ async def ask_email(update: Update, context: ContextTypes.DEFAULT_TYPE):
     flow_type = context.user_data.get('flow_type', 'kid')
     
     if flow_type == 'special':
-        msg_text = "3. Введите *Ваш телефон* (опционально):"
+        msg_text = "3. Введите *Ваш телефон*:"
     else:
         msg_text = "3. Введите *Ваш телефон* (для связи по доставке физического сертификата, если выбран такой вариант):"
     
@@ -1023,7 +1023,7 @@ async def choose_cert_type(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['product_price'] = PRODUCT_PRICE_CERT_BOX
         context.user_data['product_name'] = PRODUCT_NAME_CERT_BOX
         
-        await query.edit_message_text("📍 Введите адрес доставки (с индексом):")
+        await query.edit_message_text("📍 Введите ваш полный адрес доставки СДЭК (с индексом):")
         return ASKING_ADDRESS_GIFT
 
     elif choice == 'cert_special_digital':
@@ -1038,7 +1038,7 @@ async def choose_cert_type(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['product_price'] = PRODUCT_PRICE_CERT_SPECIAL_BOX
         context.user_data['product_name'] = PRODUCT_NAME_CERT_SPECIAL_BOX
         
-        await query.edit_message_text("📍 Введите адрес доставки (с индексом):")
+        await query.edit_message_text("📍 Введите ваш полный адрес доставки СДЭК (с индексом):")
         return ASKING_ADDRESS_GIFT
 
 async def ask_address_gift(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1131,17 +1131,7 @@ async def ask_fio(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['address'] = "Сертификат (онлайн)"
         
         # Сразу переходим к отзывам/подтверждению
-        reviews_text = (
-            f"Что говорят те, кто уже купил:\n\n"
-            f"«Подарили сертификат племяннику. Он в восторге от урока!» — Анна.\n\n"
-            f"«Отличная инициатива. Рад, что могу помочь особенным детям.» — Сергей.\n\n"
-            f"Готовы оформить сертификат?"
-        )
-        keyboard = [[
-            InlineKeyboardButton("✅ ОФОРМИТЬ", callback_data='proceed_to_confirm')
-        ]]
-        await update.message.reply_text(reviews_text, reply_markup=InlineKeyboardMarkup(keyboard))
-        return SHOWING_REVIEWS
+        return await send_order_confirmation(update, context)
 
     # Иначе (Амулет) - просим адрес
     await update.message.reply_text(
@@ -1149,7 +1139,7 @@ async def ask_fio(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     await update.message.reply_text(
-        "📍 Введите ваш полный адрес доставки (желательно с индексом)"
+        "📍 Введите ваш полный адрес доставки СДЭК (желательно с индексом)"
     )
     
     return ASKING_ADDRESS
@@ -1200,28 +1190,11 @@ async def ask_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     
     # ✅ ПОКАЗЫВАЕМ ОТЗЫВЫ (SOCIAL PROOF)
-    reviews_text = (
-        f"Что говорят те, кто уже купил:\n\n"
-        f"«Залатал трубу на даче, держит второй сезон. Спасение!» — Иван, сантехник.\n\n"
-        f"«Ребёнок сломал джойстик, слепил новую кнопку за 5 минут. Теперь он фанат!» — Алексей, папа.\n\n"
-        f"«Беру в походы. Починил палатку, кружку и даже обувь. Незаменимая вещь.» — Михаил, турист.\n\n"
-        f"Больше отзывов в нашем канале: @ECOamulet\n\n"
-        f"Готовы оформить заказ?"
-    )
+    return await send_order_confirmation(update, context)
 
-    keyboard = [[
-        InlineKeyboardButton("✅ ОФОРМИТЬ ЗАКАЗ", callback_data='proceed_to_confirm')
-    ]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    await update.message.reply_text(reviews_text, reply_markup=reply_markup)
-    
-    return SHOWING_REVIEWS
-
-async def show_order_confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """✅ Показ итогового подтверждения заказа (после отзывов)"""
-    query = update.callback_query
-    await query.answer()
+async def send_order_confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """✅ Показ итогового подтверждения заказа (Skip reviews)"""
+    # Helper to handle both Message and CallbackQuery
     
     fio = context.user_data.get('fio')
     address = context.user_data.get('address')
@@ -1229,7 +1202,6 @@ async def show_order_confirmation(update: Update, context: ContextTypes.DEFAULT_
     product_id = context.user_data.get('product_id', 'amulet')
     product_price = context.user_data.get('product_price', PRODUCT_PRICE)
     
-    # Название товара
     # Название товара
     product_title = context.user_data.get('product_name', PRODUCT_NAME)
 
@@ -1251,11 +1223,18 @@ async def show_order_confirmation(update: Update, context: ContextTypes.DEFAULT_
     ]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    # Отправляем новым сообщением или редактируем старое
-    try:
-        await query.edit_message_text(confirm_text, reply_markup=reply_markup)
-    except Exception:
-        await query.message.reply_text(confirm_text, reply_markup=reply_markup)
+    if update.callback_query:
+        query = update.callback_query
+        try:
+            await query.answer()
+        except:
+            pass
+        try:
+             await query.edit_message_text(confirm_text, reply_markup=reply_markup)
+        except Exception:
+             await query.message.reply_text(confirm_text, reply_markup=reply_markup)
+    else:
+        await update.message.reply_text(confirm_text, reply_markup=reply_markup)
     
     return ASKING_CONFIRMATION
 
@@ -2169,9 +2148,7 @@ def main():
             ASKING_PHONE: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, ask_phone),
             ],
-            SHOWING_REVIEWS: [
-                CallbackQueryHandler(show_order_confirmation, pattern='^proceed_to_confirm$'),
-            ],
+
             ASKING_FIO: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, ask_fio),
             ],
