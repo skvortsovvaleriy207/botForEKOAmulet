@@ -718,21 +718,22 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     welcome_text = (
         f"👋 Привет, {user.first_name}! Добро пожаловать в магазин ЭКОамулета!\n\n"
         f"🔮 **ЭКОамулет** — твой карманный мастер.\n"
-        f"⚙️ **Как работает:** Нагрел → Слепил → Готово!\n"
-        f"✅ **Плюсы:** Прочный, многоразовый, безопасный.\n"
-        f"🌿 Прочный инструмент для тех, кто ценит и вещи, и природу.\n\n"
+        f"⚙️ **Как работает:** Нагрел, Слепил, Готово!\n"
+        f"✅ **Плюсы:** Надежный, многоразовый, безопасный.\n"
+        f"🛠 Надежный инструмент для тех, кто ценит и вещи, и природу.\n\n"
         f"🛍 **Товар:** ЭКОамулет — {PRODUCT_PRICE} ₽\n"
         f"📦 **Осталось:** {stock_quantity} шт.\n\n"
-        f"🌟 До Нового года — бесплатная доставка по РФ!\n"
-        f"> 🔥 Осталось всего 250 стартовых комплектов.\n\n"
+        f"🚚📦 СДЭК, - удобная доставка по РФ\n"
+        f"🔥 Осталось всего 250 стартовых комплектов.\n\n"
         f"👇 Нажми кнопку ниже, чтобы оформить заказ:"
     )
 
     keyboard = [[
-        InlineKeyboardButton("🛒 КУПИТЬ АМУЛЕТ", callback_data='buy_product')
+        InlineKeyboardButton("🛒 КУПИТЬ ЭКОамулет", callback_data='buy_product')
     ]]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
+    await update.message.reply_sticker("CAACAgIAAxkBAAEQNvZpYsF2s0xIJdyJqha8l-jaVaSx4AACj4kAAmATEUvBG_o3ubegKjgE")
     await update.message.reply_text(welcome_text, reply_markup=reply_markup, parse_mode="Markdown")
     
     return ConversationHandler.END
@@ -1667,18 +1668,18 @@ async def btn_back_to_main(update: Update, context: ContextTypes.DEFAULT_TYPE):
     welcome_text = (
         f"👋 Привет! Добро пожаловать в магазин ЭКОамулета!\n\n"
         f"🔮 **ЭКОамулет** — твой карманный мастер.\n"
-        f"⚙️ **Как работает:** Нагрел → Слепил → Готово!\n"
-        f"✅ **Плюсы:** Прочный, многоразовый, безопасный.\n"
-        f"🌿 Прочный инструмент для тех, кто ценит и вещи, и природу.\n\n"
+        f"⚙️ **Как работает:** Нагрел, Слепил, Готово!\n"
+        f"✅ **Плюсы:** Надежный, многоразовый, безопасный.\n"
+        f"🛠 Надежный инструмент для тех, кто ценит и вещи, и природу.\n\n"
         f"🛍 **Товар:** ЭКОамулет — {PRODUCT_PRICE} ₽\n"
         f"📦 **Осталось:** {stock_quantity} шт.\n\n"
-        f"🌟 До Нового года — бесплатная доставка по РФ!\n"
-        f"> 🔥 Осталось всего 250 стартовых комплектов.\n\n"
+        f"🚚📦 СДЭК, - удобная доставка по РФ\n"
+        f"🔥 Осталось всего 250 стартовых комплектов.\n\n"
         f"👇 Нажми кнопку ниже, чтобы оформить заказ:"
     )
     
     keyboard = [
-        [InlineKeyboardButton("🛒 КУПИТЬ АМУЛЕТ", callback_data='buy_product')],
+        [InlineKeyboardButton("🛒 КУПИТЬ ЭКОамулет", callback_data='buy_product')],
         [InlineKeyboardButton("🙌 Помочь проекту", callback_data='help_project')]
     ]
     
