@@ -1139,6 +1139,8 @@ async def ask_fio(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "📦 Уточнение по доставке: На данный момент мы осуществляем отправку заказов только по территории России. Спасибо за понимание!"
     )
 
+    await update.message.reply_sticker("CAACAgIAAxkBAAEQOcFpZMkdoI5yCvTVW1pAf9U7t3dDhgACTYwAAnjaEUtcZkw-Hyr2YDgE")
+
     await update.message.reply_text(
         "📍 Введите ваш полный адрес доставки СДЭК (желательно с индексом)"
     )
